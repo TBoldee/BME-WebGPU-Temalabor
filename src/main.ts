@@ -1,10 +1,11 @@
 import { Renderer } from './renderer.ts';
+import { testLevel } from './level.ts';
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 const renderer = await Renderer.init(canvas);
 
 function frame() {
-    renderer.render();
+    renderer.render(testLevel);
     requestAnimationFrame(frame);
 }
 
