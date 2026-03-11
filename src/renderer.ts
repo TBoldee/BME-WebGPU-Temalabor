@@ -1,7 +1,7 @@
 import quadVertWGSL from '../shaders/quad_vert.wgsl?raw';
 import fragWGSL from '../shaders/frag.wgsl?raw';
 import { quitIfWebGPUNotAvailableOrMissingFeatures } from '../util/util.ts';
-import type { Level } from './level.ts';
+import { Level, Rect } from './level.ts';
 
 // per vertex: x, y, r, g, b, a  →  6 floats × 4 bytes = 24 bytes
 const FLOATS_PER_VERTEX = 6;
@@ -87,13 +87,15 @@ export class Renderer {
     }
 
     private resizeCanvas(canvas: HTMLCanvasElement): void {
-        const dpr     = window.devicePixelRatio;
-        canvas.width  = canvas.clientWidth  * dpr;
-        canvas.height = canvas.clientHeight * dpr;
+        //const dpr     = window.devicePixelRatio;
+        canvas.width  = canvas.clientWidth  //* dpr;
+        canvas.height = canvas.clientHeight //* dpr;
     }
 
     render(level: Level): void {
-        const { rects } = level;
+        let rects: Rect[] = level.rects;
+        rects.push(level.player); //player rendered as a rectangle
+        rects = [level.background].concat(rects);
         const sw = this.canvas.width;
         const sh = this.canvas.height;
 
