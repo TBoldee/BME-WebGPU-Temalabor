@@ -1,20 +1,21 @@
-import type { Level } from "./level.ts";
+import {type Level} from "./level.ts";
 import type { Rect } from "./rect.ts";
 import {Player} from "./player.ts";
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
-//const canvasWidth = canvas.width;
-const canvasHeight = canvas.height;
 
 export function applyPhysics(level: Level): void {
     const player = level.player;
-    if (player.y > canvasHeight - player.h) return;
+    if (player.y > canvas.height - player.h) return;
+
+    if (!checkGrounded(player, level)) {
+        player.verticalSpeed = level.gravity;
+    } else player.verticalSpeed = 0;
+
+    player.y += player.verticalSpeed;
+    player.x += player.horizontalSpeed;
 
     let collidedRects = getCollidedRects(level.rects, player);
-    if (collidedRects.length === 0) {
-        player.y = Math.min(canvasHeight - player.h, player.y + 20);
-        collidedRects = getCollidedRects(level.rects, player);
-    }
     if (collidedRects.length !== 0) resolveCollisions(collidedRects, player);
 }
 
@@ -28,7 +29,8 @@ function getCollidedRects(rects: Rect[], player: Player): Rect[]{
     }
     return collidedRects;
 }
-function checkCollision(rect: Rect, player: Player): boolean {
+
+function checkCollision(rect: Rect, player: Rect): boolean {
     if ((player.x + player.w < rect.x || player.x > rect.x + rect.w)) return false;
     if ((player.y + player.h < rect.y || player.y > rect.y + rect.h)) return false;
     return true;
@@ -40,7 +42,7 @@ function resolveCollisions(collidedRects: Rect[], player: Player) {
     const [MTVX, MTVY] = calculateMinimumTranslationVector(smallestMTVRect, player);
     if (MTVX < MTVY) {
         player.x = player.x + (MTVX + 1) * calculateMoveDirection(smallestMTVRect, player, "x"); //+1 pixel to prevent floating point errors causing the player to get stuck
-    } else if (MTVY < MTVX) {
+    } else if (MTVY <= MTVX) {
         player.y = player.y + (MTVY + 1) * calculateMoveDirection(smallestMTVRect, player, "y");
     }
     collidedRects = getCollidedRects(collidedRects, player);
@@ -102,4 +104,20 @@ function findRectWithSmallestMTV(rects: Rect[], player:Player): Rect {
         }
     }
     return smallest;
+}
+
+function checkGrounded(player: Rect, level: Level): boolean{
+    const groundCheckRect: Rect = {
+        x: player.x,
+        y: player.y + player.h,
+        w: player.w,
+        h: 1,
+        color: [0,0,0,0]
+    };
+    for (const rect of level.rects) {
+        if (checkCollision(rect, groundCheckRect)){
+            return true;
+        }
+    }
+    return false;
 }

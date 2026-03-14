@@ -6,11 +6,13 @@ export class Level {
     rects: Rect[];
     player: Player;
     background: Rect;
+    gravity: number;
 
-    constructor(startX: number, startY: number, rects: Rect[], background: string) {
+    constructor(startX: number, startY: number, rects: Rect[], backgroundColor: string, gravity: number = 20) {
         this.rects = rects;
         this.player = new Player(startX, startY);
-        this.background = new Rect(0,0,900,900,background);
+        this.background = new Rect(0,0,900,900,backgroundColor);
+        this.gravity = gravity;
     }
 }
 
