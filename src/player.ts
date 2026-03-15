@@ -1,4 +1,5 @@
 import {Rect} from "./rect.ts";
+import {colors} from "../util/colors.ts";
 
 export class Player extends Rect {
     falling: boolean;
@@ -13,6 +14,7 @@ export class Player extends Rect {
         super(x,y,20,60);
         this.falling = false;
         this.jumping = false;
+        this.color = colors["gray"];
     }
 
     applyGravity(g: number){
@@ -52,5 +54,11 @@ export class Player extends Rect {
             this.movingRight = false;
             this.horizontalSpeed -= this.speed;
         }
+    }
+
+    lieDown(){
+        if (this.falling) return;
+        [this.w, this.h] = [this.h, this.w];
+        this.move(this.x - (this.w - this.h)/2, this.y + this.w - this.h);
     }
 }

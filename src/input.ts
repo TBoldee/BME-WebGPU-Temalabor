@@ -19,11 +19,17 @@ window.addEventListener('keydown', (event) => {
             break;
         case 'A':
         case 'a':
+        case 'ArrowLeft':
             testLevel.player.startMoveLeft();
             break;
         case 'D':
         case 'd':
+        case 'ArrowRight':
             testLevel.player.startMoveRight();
+            break;
+        case 'c':
+        case 'C':
+            testLevel.player.lieDown();
             break;
         default:
             break;
@@ -38,10 +44,12 @@ window.addEventListener('keyup', (event) => {
             break;
         case 'A':
         case 'a':
+        case 'ArrowLeft':
             testLevel.player.stopMoveLeft();
             break;
         case 'D':
         case 'd':
+        case 'ArrowRight':
             testLevel.player.stopMoveRight();
             break;
         default:
