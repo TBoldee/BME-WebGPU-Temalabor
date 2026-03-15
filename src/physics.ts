@@ -16,12 +16,8 @@ export function applyPhysics(level: Level): void {
         player.verticalSpeed = 0;
     }
 
-    player.y += player.verticalSpeed;
+    player.applySpeed();
     let collidedRects = getCollidedRects(level.rects, player);
-    if (collidedRects.length !== 0) resolveCollisions(collidedRects, player);
-
-    player.x += player.horizontalSpeed;
-    collidedRects = getCollidedRects(level.rects, player);
     if (collidedRects.length !== 0) resolveCollisions(collidedRects, player);
 }
 
@@ -48,9 +44,9 @@ function resolveCollisions(collidedRects: Rect[], player: Player) {
     const [MTVX, MTVY] = calculateMinimumTranslationVector(smallestMTVRect, player);
 
     if (MTVY <= MTVX || (player.falling && !player.movingRight && !player.movingLeft))  { //prefer vertical resolution if player is falling and not moving
-        player.y = player.y + (MTVY + 1) * calculateMoveDirection(smallestMTVRect, player, "y");//+1 pixel to prevent floating point errors causing the player to get stuck
+        player.move(0, (MTVY + 1) * calculateMoveDirection(smallestMTVRect, player, "y"));//+1 pixel to prevent floating point errors causing the player to get stuck
     } else if (MTVX < MTVY) {
-        player.x = player.x + (MTVX + 1) * calculateMoveDirection(smallestMTVRect, player, "x");
+        player.move((MTVX + 1) * calculateMoveDirection(smallestMTVRect, player, "x"),0);
     }
     collidedRects = getCollidedRects(collidedRects, player);
     if (collidedRects.length !== 0) resolveCollisions(collidedRects, player); //Recursive call in case one resolution was not enough

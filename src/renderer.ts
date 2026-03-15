@@ -97,7 +97,7 @@ export class Renderer {
     render(level: Level): void {
         let rects: Rect[] = [];
         rects.push(...level.rects);
-        rects.push(level.player); //player rendered as a rectangle
+        rects.push(level.player.visualRectangle); //player rendered as a rectangle
         rects = [level.background].concat(rects);
         const sw = this.canvas.width;
         const sh = this.canvas.height;

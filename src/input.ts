@@ -7,7 +7,7 @@ canvas.addEventListener('mousedown', (event) => {
         let rect = canvas.getBoundingClientRect();
         let x = event.clientX - rect.left;
         let y = event.clientY - rect.top;
-        testLevel.player.move(x, y);
+        testLevel.player.moveTo(x, y);
     }
 });
 
