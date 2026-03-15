@@ -17,10 +17,19 @@ export function applyPhysics(level: Level): void {
     }
 
     player.applySpeed();
-    let collidedRects = getCollidedRects(level.rects, player);
-    if (collidedRects.length !== 0) resolveCollisions(collidedRects, player);
+    getCollisionsAndResolve(level);
 }
 
+export function getCollisionsAndResolve(level: Level): void {
+    const player = level.player;
+    let collidedRects = getCollidedRects(level.rects, player);
+    const maximumRecursions = 6;
+    let currentRecursions = 0;
+    while (collidedRects.length !== 0 && currentRecursions++ < maximumRecursions) {
+        resolveCollisions(collidedRects, player);
+        collidedRects = getCollidedRects(level.rects, player);
+    }
+}
 
 function getCollidedRects(rects: Rect[], player: Player): Rect[]{
     const collidedRects: Rect[] = [];
@@ -33,23 +42,20 @@ function getCollidedRects(rects: Rect[], player: Player): Rect[]{
 }
 
 function checkCollision(rect: Rect, player: Rect): boolean {
-    if ((player.x + player.w < rect.x || player.x > rect.x + rect.w)) return false;
-    if ((player.y + player.h < rect.y || player.y > rect.y + rect.h)) return false;
+    if ((player.x + player.w <= rect.x || player.x >= rect.x + rect.w)) return false;
+    if ((player.y + player.h <= rect.y || player.y >= rect.y + rect.h)) return false;
     return true;
 }
 
-function resolveCollisions(collidedRects: Rect[], player: Player) {
+function resolveCollisions(collidedRects: Rect[], player: Player): void {
     const smallestMTVRect = findRectWithSmallestMTV(collidedRects, player);
-    collidedRects = removeItem(collidedRects, smallestMTVRect);
     const [MTVX, MTVY] = calculateMinimumTranslationVector(smallestMTVRect, player);
 
     if (MTVY <= MTVX || (player.falling && !player.movingRight && !player.movingLeft))  { //prefer vertical resolution if player is falling and not moving
-        player.move(0, (MTVY + 1) * calculateMoveDirection(smallestMTVRect, player, "y"));//+1 pixel to prevent floating point errors causing the player to get stuck
+        player.move(0, MTVY * calculateMoveDirection(smallestMTVRect, player, "y"));
     } else if (MTVX < MTVY) {
-        player.move((MTVX + 1) * calculateMoveDirection(smallestMTVRect, player, "x"),0);
+        player.move(MTVX * calculateMoveDirection(smallestMTVRect, player, "x"),0);
     }
-    collidedRects = getCollidedRects(collidedRects, player);
-    if (collidedRects.length !== 0) resolveCollisions(collidedRects, player); //Recursive call in case one resolution was not enough
 }
 
 function calculateMinimumTranslationVector(rect: Rect, player: Player): [number,number] {
@@ -91,19 +97,14 @@ function calculateMoveDirection(rect: Rect, player: Player, axis: "x" | "y"): -1
     }
 }
 
-function removeItem<T>(arr: Array<T>, value: T): Array<T> {
-    const index = arr.indexOf(value);
-    if (index > -1) {
-        arr.splice(index, 1);
-    }
-    return arr;
-}
-
 function findRectWithSmallestMTV(rects: Rect[], player:Player): Rect {
     let smallest: Rect = rects[0];
+    let [smallestMTVX, smallestMTVY] = calculateMinimumTranslationVector(smallest, player);
     for (const rect of rects) {
-        if (calculateMinimumTranslationVector(rect, player) < calculateMinimumTranslationVector(smallest, player)){
+        let [rectMTVX, rectMTVY] = calculateMinimumTranslationVector(rect, player)
+        if (Math.min(rectMTVX, rectMTVY) < Math.min(smallestMTVX, smallestMTVY)){
             smallest = rect;
+            [smallestMTVX, smallestMTVY] = [rectMTVX, rectMTVY];
         }
     }
     return smallest;

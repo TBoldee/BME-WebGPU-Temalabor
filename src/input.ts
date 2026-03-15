@@ -1,4 +1,5 @@
 import {testLevel} from "./level.ts";
+import {getCollisionsAndResolve} from "./physics.ts";
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 
@@ -8,6 +9,7 @@ canvas.addEventListener('mousedown', (event) => {
         let x = event.clientX - rect.left;
         let y = event.clientY - rect.top;
         testLevel.player.moveTo(x, y);
+        getCollisionsAndResolve(testLevel)
     }
 });
 
@@ -34,6 +36,7 @@ window.addEventListener('keydown', (event) => {
         default:
             break;
     }
+    getCollisionsAndResolve(testLevel);
 })
 
 window.addEventListener('keyup', (event) => {

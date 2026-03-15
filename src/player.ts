@@ -9,7 +9,6 @@ export class Player extends Rect {
     horizontalSpeed: number;
     verticalSpeed: number;
     private speed: number;
-    visualRectangle: Rect;
 
     constructor(x: number, y: number) {
         super(x,y,20,60);
@@ -18,7 +17,6 @@ export class Player extends Rect {
         this.horizontalSpeed = 0;
         this.verticalSpeed = 0;
         this.speed = 7;
-        this.visualRectangle = new Rect(x-1, y-1,22,62, "gray");
         this.color = colors["gray"];
     }
 
@@ -34,22 +32,17 @@ export class Player extends Rect {
     }
 
     moveTo(x: number, y: number) {
-        this.x = x;
-        this.y = y;
-        this.visualRectangle.x = x-1;
-        this.visualRectangle.y = y-1;
+        this.x = Math.floor(x);
+        this.y = Math.floor(y);
     }
     move(x: number, y: number) {
-        this.x += x;
-        this.y += y;
-        this.visualRectangle.x = this.x-1;
-        this.visualRectangle.y = this.y-1;
+        this.x = Math.floor(this.x + x);
+        this.y = Math.floor(this.y + y);
+
     }
     applySpeed(){
-        this.x += this.horizontalSpeed;
-        this.y += this.verticalSpeed;
-        this.visualRectangle.x = this.x-1;
-        this.visualRectangle.y = this.y-1;
+        this.x = Math.floor(this.x + this.horizontalSpeed);
+        this.y = Math.floor(this.y + this.verticalSpeed);
     }
 
     startMoveLeft(){
@@ -80,10 +73,6 @@ export class Player extends Rect {
     lieDown(){
         if (this.falling) return;
         [this.w, this.h] = [this.h, this.w];
-        this.moveTo(this.x - (this.w - this.h)/2, this.y + this.w - this.h);
-
-        [this.visualRectangle.w, this.visualRectangle.h] = [this.visualRectangle.h, this.visualRectangle.w];
-        this.visualRectangle.x = this.x-1;
-        this.visualRectangle.y = this.y-1;
+        this.moveTo(this.x - (this.w - this.h) / 2, this.y + this.w - this.h);
     }
 }
