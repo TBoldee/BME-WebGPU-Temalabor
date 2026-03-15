@@ -15,6 +15,16 @@ export class Player extends Rect {
         this.jumping = false;
     }
 
+    applyGravity(g: number){
+        if (this.verticalSpeed == 0){
+            this.verticalSpeed = g;
+        } else {
+            const multiplier: number = 1 + (g / 10);
+            this.verticalSpeed *= multiplier;
+            if (this.verticalSpeed > 30) this.verticalSpeed = 30;
+        }
+    }
+
     move(x: number, y: number) {
         this.x = x;
         this.y = y;

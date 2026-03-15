@@ -9,13 +9,19 @@ export function applyPhysics(level: Level): void {
     if (player.y > canvas.height - player.h) return;
 
     if (!checkGrounded(player, level)) {
-        player.verticalSpeed = level.gravity;
-    } else player.verticalSpeed = 0;
+        player.falling = true;
+        player.applyGravity(level.gravity);
+    } else {
+        player.falling = false;
+        player.verticalSpeed = 0;
+    }
 
     player.y += player.verticalSpeed;
-    player.x += player.horizontalSpeed;
-
     let collidedRects = getCollidedRects(level.rects, player);
+    if (collidedRects.length !== 0) resolveCollisions(collidedRects, player);
+
+    player.x += player.horizontalSpeed;
+    collidedRects = getCollidedRects(level.rects, player);
     if (collidedRects.length !== 0) resolveCollisions(collidedRects, player);
 }
 
@@ -40,10 +46,11 @@ function resolveCollisions(collidedRects: Rect[], player: Player) {
     const smallestMTVRect = findRectWithSmallestMTV(collidedRects, player);
     collidedRects = removeItem(collidedRects, smallestMTVRect);
     const [MTVX, MTVY] = calculateMinimumTranslationVector(smallestMTVRect, player);
-    if (MTVX < MTVY) {
-        player.x = player.x + (MTVX + 1) * calculateMoveDirection(smallestMTVRect, player, "x"); //+1 pixel to prevent floating point errors causing the player to get stuck
-    } else if (MTVY <= MTVX) {
-        player.y = player.y + (MTVY + 1) * calculateMoveDirection(smallestMTVRect, player, "y");
+
+    if (MTVY <= MTVX || (player.falling && !player.movingRight && !player.movingLeft))  { //prefer vertical resolution if player is falling and not moving
+        player.y = player.y + (MTVY + 1) * calculateMoveDirection(smallestMTVRect, player, "y");//+1 pixel to prevent floating point errors causing the player to get stuck
+    } else if (MTVX < MTVY) {
+        player.x = player.x + (MTVX + 1) * calculateMoveDirection(smallestMTVRect, player, "x");
     }
     collidedRects = getCollidedRects(collidedRects, player);
     if (collidedRects.length !== 0) resolveCollisions(collidedRects, player); //Recursive call in case one resolution was not enough
