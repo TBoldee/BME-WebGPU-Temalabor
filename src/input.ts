@@ -11,6 +11,7 @@ canvas.addEventListener('mousedown', (event) => {
         let y = event.clientY - rect.top;
         currentLevel.player.moveTo(x, y);
         getCollisionsAndResolve(currentLevel);
+        console.log(`Clicked: ${x} : ${y}`);
     }
 });
 

@@ -19,14 +19,16 @@ export class Player extends Rect {
         this.standing = true;
         this.horizontalSpeed = 0;
         this.verticalSpeed = 0;
-        this.speed = 7;
+        this.speed = 6;
         this.color = colors["gray"];
     }
 
     applyGravity(g: number){
         let gravity = Math.abs(g);
+        const maxGravity: number = Math.floor(this.h/2);
         if (this.verticalSpeed == 0) {
             this.verticalSpeed = gravity;
+            this.jumping = false;
         } else if (this.verticalSpeed < 0) {
             const multiplier: number = 1 / (1 + (gravity / 10));
             this.verticalSpeed *= multiplier;
@@ -34,7 +36,7 @@ export class Player extends Rect {
         } else {
             const multiplier: number = 1 + (gravity / 10);
             this.verticalSpeed *= multiplier;
-            if (this.verticalSpeed > 30) this.verticalSpeed = 30;
+            if (this.verticalSpeed > maxGravity) this.verticalSpeed = maxGravity;
         }
     }
 
@@ -92,7 +94,7 @@ export class Player extends Rect {
     startJumping(): void {
         if (this.jumping || this.falling) return;
         this.jumping = true;
-        this.verticalSpeed = -20;
+        this.verticalSpeed = this.standing ? -20 : -10;
     }
     stopJumping(): void {
         this.jumping = false;

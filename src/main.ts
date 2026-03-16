@@ -6,7 +6,7 @@ import {Level} from "./level.ts";
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 const renderer = await Renderer.init(canvas);
 let currentLevel: Level = Level.getCurrentLevel();
-const timeStep = 17;
+const timeStep = 1000 / 60;
 let lastTime = 0;
 let timeAccumulator = 0;
 
@@ -21,6 +21,7 @@ function frame(currentTime: number) {
         applyPhysics(currentLevel);
         timeAccumulator -= timeStep;
     }
+
     lastTime = currentTime;
 
     renderer.render(currentLevel);

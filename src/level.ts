@@ -26,13 +26,21 @@ const testLevel: Level = new Level (
         200, 200,
         [{ x: 0,   y: 800, w: 900, h: 100, color: colors["orange"] },
         // left wall
-        { x: 0,   y: 0,   w: 50,  h: 900, color: colors["black"] },
+        { x: 0,   y: 0,   w: 50,  h: 900, color: colors["orange"] },
         // right wall
-        { x: 850, y: 0,   w: 50,  h: 900, color: colors["black"] },
+        { x: 850, y: 0,   w: 50,  h: 900, color: colors["orange"] },
         // platforms
-        { x: 200, y: 550, w: 200, h: 30,  color: colors["orange"] },
-        { x: 380, y: 475, w: 150, h: 30,  color: colors["orange"] },
-        { x: 500, y: 400, w: 200, h: 30,  color: colors["orange"] }],
+        { x: 200, y: 550, w: 210, h: 30,  color: colors["orange"] },
+        { x: 600, y: 550, w: 50,  h: 100,  color: colors["orange"] },
+        { x: 450, y: 550, w: 70,  h: 30,  color: colors["orange"] },
+        { x: 380, y: 460, w: 30,  h: 60,  color: colors["orange"] },
+        { x: 675, y: 550, w: 60,  h: 30,  color: colors["orange"] },
+        { x: 600, y: 650, w: 160,  h: 30,  color: colors["orange"] },
+        { x: 380, y: 460, w: 350, h: 30,  color: colors["orange"] },
+        { x: 120, y: 700, w: 150, h: 30,  color: colors["orange"] },
+        { x: 730, y: 460, w: 30, h: 120,  color: colors["orange"] },
+        { x: 100, y: 620, w: 50,  h: 30,  color: colors["orange"] },
+        { x: 500, y: 380, w: 200, h: 30,  color: colors["orange"] }],
         "beige"
     );
 

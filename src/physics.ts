@@ -8,14 +8,13 @@ export function applyPhysics(level: Level): void {
     const player = level.player;
     if (player.y > canvas.height - player.h) return;
 
-
-
-    if (checkGrounded(player, level) && !player.jumping) {
+    if (isGrounded(player, level) && !player.jumping) {
         player.falling = false;
         player.verticalSpeed = 0;
         player.jumping = false;
     } else {
         player.falling = true;
+        if (isHittingCeiling(player, level)) player.verticalSpeed = 0;
         player.applyGravity(level.gravity);
     }
 
@@ -113,7 +112,7 @@ function findRectWithSmallestMTV(rects: Rect[], player:Player): Rect {
     return smallest;
 }
 
-function checkGrounded(player: Rect, level: Level): boolean{
+function isGrounded(player: Rect, level: Level): boolean{
     const groundCheckRect: Rect = {
         x: player.x,
         y: player.y + player.h,
@@ -123,6 +122,22 @@ function checkGrounded(player: Rect, level: Level): boolean{
     };
     for (const rect of level.rects) {
         if (checkCollision(rect, groundCheckRect)){
+            return true;
+        }
+    }
+    return false;
+}
+
+function isHittingCeiling(player: Rect, level: Level): boolean {
+    const ceilingCheckRect: Rect = {
+        x: player.x,
+        y: player.y-1,
+        w: player.w,
+        h: 1,
+        color: [0,0,0,0]
+    };
+    for (const rect of level.rects) {
+        if (checkCollision(rect, ceilingCheckRect)){
             return true;
         }
     }
