@@ -1,15 +1,16 @@
-import {testLevel} from "./level.ts";
+import {Level} from "./level.ts";
 import {getCollisionsAndResolve} from "./physics.ts";
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
+let currentLevel: Level = Level.getCurrentLevel();
 
 canvas.addEventListener('mousedown', (event) => {
     if (event.button === 0) {
         let rect = canvas.getBoundingClientRect();
         let x = event.clientX - rect.left;
         let y = event.clientY - rect.top;
-        testLevel.player.moveTo(x, y);
-        getCollisionsAndResolve(testLevel)
+        currentLevel.player.moveTo(x, y);
+        getCollisionsAndResolve(currentLevel);
     }
 });
 
@@ -22,21 +23,21 @@ window.addEventListener('keydown', (event) => {
         case 'A':
         case 'a':
         case 'ArrowLeft':
-            testLevel.player.startMoveLeft();
+            currentLevel.player.startMoveLeft();
             break;
         case 'D':
         case 'd':
         case 'ArrowRight':
-            testLevel.player.startMoveRight();
+            currentLevel.player.startMoveRight();
             break;
         case 'c':
         case 'C':
-            testLevel.player.lieDownIfPossible(testLevel.rects);
+            currentLevel.player.lieDownIfPossible(currentLevel.rects);
             break;
         default:
             break;
     }
-    getCollisionsAndResolve(testLevel);
+    getCollisionsAndResolve(currentLevel);
 })
 
 window.addEventListener('keyup', (event) => {
@@ -48,12 +49,12 @@ window.addEventListener('keyup', (event) => {
         case 'A':
         case 'a':
         case 'ArrowLeft':
-            testLevel.player.stopMoveLeft();
+            currentLevel.player.stopMoveLeft();
             break;
         case 'D':
         case 'd':
         case 'ArrowRight':
-            testLevel.player.stopMoveRight();
+            currentLevel.player.stopMoveRight();
             break;
         default:
             break;

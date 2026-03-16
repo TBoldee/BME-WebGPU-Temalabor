@@ -1,10 +1,11 @@
 import { Renderer } from './renderer.ts';
-import { testLevel } from './level.ts';
 import {applyPhysics} from "./physics.ts";
 import './input.ts';
+import {Level} from "./level.ts";
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 const renderer = await Renderer.init(canvas);
+let currentLevel: Level = Level.getCurrentLevel();
 const timeStep = 17;
 let lastTime = 0;
 let timeAccumulator = 0;
@@ -17,12 +18,12 @@ function frame(currentTime: number) {
     const delta = currentTime - lastTime;
     timeAccumulator += delta;
     while (timeAccumulator >= timeStep){
-        applyPhysics(testLevel);
+        applyPhysics(currentLevel);
         timeAccumulator -= timeStep;
     }
     lastTime = currentTime;
 
-    renderer.render(testLevel);
+    renderer.render(currentLevel);
     requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

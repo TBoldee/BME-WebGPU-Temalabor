@@ -14,9 +14,15 @@ export class Level {
         this.background = new Rect(0,0,900,900,backgroundColor);
         this.gravity = gravity;
     }
+
+    public static getCurrentLevel(): Level{
+        return levels[0];
+    }
 }
 
-export const testLevel: Level = new Level (
+const levels: Level[] = [];
+
+const testLevel: Level = new Level (
         200, 200,
         [{ x: 0,   y: 800, w: 900, h: 100, color: colors["orange"] },
         // left wall
@@ -30,3 +36,4 @@ export const testLevel: Level = new Level (
         "beige"
     );
 
+levels.push(testLevel);
