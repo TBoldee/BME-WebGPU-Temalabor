@@ -1,9 +1,11 @@
 import {Rect} from "./rect.ts";
 import {colors} from "../util/colors.ts";
+import {getCollidedRects} from "./physics.ts";
 
 export class Player extends Rect {
     falling: boolean;
     jumping: boolean;
+    standing: boolean;
     movingLeft: boolean;
     movingRight: boolean;
     horizontalSpeed: number;
@@ -14,6 +16,7 @@ export class Player extends Rect {
         super(x,y,20,60);
         this.falling = false;
         this.jumping = false;
+        this.standing = true;
         this.horizontalSpeed = 0;
         this.verticalSpeed = 0;
         this.speed = 7;
@@ -70,9 +73,15 @@ export class Player extends Rect {
         }
     }
 
-    lieDown(){
+    lieDownIfPossible(rects: Rect[]){
         if (this.falling) return;
+        this.lieDown();
+        if (this.standing && getCollidedRects(rects, this).length !== 0) this.lieDown();
+    }
+
+    private lieDown(){
         [this.w, this.h] = [this.h, this.w];
         this.moveTo(this.x - (this.w - this.h) / 2, this.y + this.w - this.h);
+        this.standing = !this.standing;
     }
 }

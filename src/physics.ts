@@ -31,7 +31,7 @@ export function getCollisionsAndResolve(level: Level): void {
     }
 }
 
-function getCollidedRects(rects: Rect[], player: Player): Rect[]{
+export function getCollidedRects(rects: Rect[], player: Player): Rect[]{
     const collidedRects: Rect[] = [];
     for (const rect of rects) {
         if (checkCollision(rect, player)){

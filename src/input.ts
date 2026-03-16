@@ -31,7 +31,7 @@ window.addEventListener('keydown', (event) => {
             break;
         case 'c':
         case 'C':
-            testLevel.player.lieDown();
+            testLevel.player.lieDownIfPossible(testLevel.rects);
             break;
         default:
             break;
