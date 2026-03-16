@@ -25,8 +25,12 @@ export class Player extends Rect {
 
     applyGravity(g: number){
         let gravity = Math.abs(g);
-        if (this.verticalSpeed == 0){
+        if (this.verticalSpeed == 0) {
             this.verticalSpeed = gravity;
+        } else if (this.verticalSpeed < 0) {
+            const multiplier: number = 1 / (1 + (gravity / 10));
+            this.verticalSpeed *= multiplier;
+            if (this.verticalSpeed > -0.5) this.verticalSpeed = 0;
         } else {
             const multiplier: number = 1 + (gravity / 10);
             this.verticalSpeed *= multiplier;
@@ -83,5 +87,14 @@ export class Player extends Rect {
         [this.w, this.h] = [this.h, this.w];
         this.moveTo(this.x - (this.w - this.h) / 2, this.y + this.w - this.h);
         this.standing = !this.standing;
+    }
+
+    startJumping(): void {
+        if (this.jumping || this.falling) return;
+        this.jumping = true;
+        this.verticalSpeed = -20;
+    }
+    stopJumping(): void {
+        this.jumping = false;
     }
 }

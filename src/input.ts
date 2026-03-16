@@ -19,6 +19,7 @@ window.addEventListener('keydown', (event) => {
         case 'W':
         case 'w':
         case ' ':
+            currentLevel.player.startJumping();
             break;
         case 'A':
         case 'a':
@@ -45,6 +46,7 @@ window.addEventListener('keyup', (event) => {
         case 'W':
         case 'w':
         case ' ':
+            currentLevel.player.stopJumping();
             break;
         case 'A':
         case 'a':

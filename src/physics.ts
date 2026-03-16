@@ -8,12 +8,15 @@ export function applyPhysics(level: Level): void {
     const player = level.player;
     if (player.y > canvas.height - player.h) return;
 
-    if (!checkGrounded(player, level)) {
-        player.falling = true;
-        player.applyGravity(level.gravity);
-    } else {
+
+
+    if (checkGrounded(player, level) && !player.jumping) {
         player.falling = false;
         player.verticalSpeed = 0;
+        player.jumping = false;
+    } else {
+        player.falling = true;
+        player.applyGravity(level.gravity);
     }
 
     player.applySpeed();
