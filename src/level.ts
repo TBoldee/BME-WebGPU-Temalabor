@@ -34,6 +34,7 @@ const testLevel: Level = new Level (
         { x: 600, y: 550, w: 50,  h: 100,  color: colors["orange"] },
         { x: 450, y: 550, w: 70,  h: 30,  color: colors["orange"] },
         { x: 380, y: 460, w: 30,  h: 60,  color: colors["orange"] },
+        { x: 840, y: 460, w: 30,  h: 5,  color: colors["orange"] },
         { x: 675, y: 550, w: 60,  h: 30,  color: colors["orange"] },
         { x: 600, y: 650, w: 160,  h: 30,  color: colors["orange"] },
         { x: 380, y: 460, w: 350, h: 30,  color: colors["orange"] },

@@ -53,7 +53,7 @@ function resolveCollisions(collidedRects: Rect[], player: Player): void {
     const smallestMTVRect = findRectWithSmallestMTV(collidedRects, player);
     const [MTVX, MTVY] = calculateMinimumTranslationVector(smallestMTVRect, player);
 
-    if (MTVY <= MTVX || (player.isFalling && !player.isMovingRight && !player.isMovingLeft))  { //prefer vertical resolution if player is falling and not moving
+    if (MTVY <= MTVX || (player.isFalling && player.horizontalSpeed === 0))  { //prefer vertical resolution if player is falling and not moving
         player.move(0, MTVY * calculateMoveDirection(smallestMTVRect, player, "y"));
     } else if (MTVX < MTVY) {
         player.move(MTVX * calculateMoveDirection(smallestMTVRect, player, "x"),0);
