@@ -47,7 +47,6 @@ window.addEventListener('keyup', (event) => {
         case 'W':
         case 'w':
         case ' ':
-            currentLevel.player.stopJumping();
             break;
         case 'A':
         case 'a':

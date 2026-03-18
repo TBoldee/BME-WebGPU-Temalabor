@@ -8,14 +8,14 @@ export function applyPhysics(level: Level): void {
     const player = level.player;
     if (player.y > canvas.height - player.h) return;
 
-    if (isGrounded(player, level) && !player.jumping) {
-        player.falling = false;
-        player.verticalSpeed = 0;
-        player.jumping = false;
-    } else {
-        player.falling = true;
+    if (!isGrounded(player, level) || player.isJumping) {
+        player.isFalling = true;
         if (isHittingCeiling(player, level)) player.verticalSpeed = 0;
         player.applyGravity(level.gravity);
+    } else {
+        player.isFalling = false;
+        player.verticalSpeed = 0;
+        player.isJumping = false;
     }
 
     player.applySpeed();
@@ -53,7 +53,7 @@ function resolveCollisions(collidedRects: Rect[], player: Player): void {
     const smallestMTVRect = findRectWithSmallestMTV(collidedRects, player);
     const [MTVX, MTVY] = calculateMinimumTranslationVector(smallestMTVRect, player);
 
-    if (MTVY <= MTVX || (player.falling && !player.movingRight && !player.movingLeft))  { //prefer vertical resolution if player is falling and not moving
+    if (MTVY <= MTVX || (player.isFalling && !player.isMovingRight && !player.isMovingLeft))  { //prefer vertical resolution if player is falling and not moving
         player.move(0, MTVY * calculateMoveDirection(smallestMTVRect, player, "y"));
     } else if (MTVX < MTVY) {
         player.move(MTVX * calculateMoveDirection(smallestMTVRect, player, "x"),0);

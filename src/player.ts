@@ -3,20 +3,20 @@ import {colors} from "../util/colors.ts";
 import {getCollidedRects} from "./physics.ts";
 
 export class Player extends Rect {
-    falling: boolean;
-    jumping: boolean;
-    standing: boolean;
-    movingLeft: boolean;
-    movingRight: boolean;
+    isFalling: boolean;
+    isJumping: boolean;
+    isStanding: boolean;
+    isMovingLeft: boolean;
+    isMovingRight: boolean;
     horizontalSpeed: number;
     verticalSpeed: number;
     private speed: number;
 
     constructor(x: number, y: number) {
         super(x,y,20,60);
-        this.falling = false;
-        this.jumping = false;
-        this.standing = true;
+        this.isFalling = false;
+        this.isJumping = false;
+        this.isStanding = true;
         this.horizontalSpeed = 0;
         this.verticalSpeed = 0;
         this.speed = 6;
@@ -28,7 +28,7 @@ export class Player extends Rect {
         const maxGravity: number = Math.floor(this.h/2);
         if (this.verticalSpeed == 0) {
             this.verticalSpeed = gravity;
-            this.jumping = false;
+            this.isJumping = false;
         } else if (this.verticalSpeed < 0) {
             const multiplier: number = 1 / (1 + (gravity / 10));
             this.verticalSpeed *= multiplier;
@@ -55,48 +55,45 @@ export class Player extends Rect {
     }
 
     startMoveLeft(){
-        if (!this.movingLeft) {
-            this.movingLeft = true;
+        if (!this.isMovingLeft) {
+            this.isMovingLeft = true;
             this.horizontalSpeed -= this.speed;
         }
     }
     stopMoveLeft(){
-        if (this.movingLeft) {
-            this.movingLeft = false;
+        if (this.isMovingLeft) {
+            this.isMovingLeft = false;
             this.horizontalSpeed += this.speed;
         }
     }
     startMoveRight(){
-        if (!this.movingRight) {
-            this.movingRight = true;
+        if (!this.isMovingRight) {
+            this.isMovingRight = true;
             this.horizontalSpeed += this.speed;
         }
     }
     stopMoveRight(){
-        if (this.movingRight) {
-            this.movingRight = false;
+        if (this.isMovingRight) {
+            this.isMovingRight = false;
             this.horizontalSpeed -= this.speed;
         }
     }
 
     lieDownIfPossible(rects: Rect[]){
-        if (this.falling) return;
+        if (this.isFalling) return;
         this.lieDown();
-        if (this.standing && getCollidedRects(rects, this).length !== 0) this.lieDown();
+        if (this.isStanding && getCollidedRects(rects, this).length !== 0) this.lieDown();
     }
 
     private lieDown(){
         [this.w, this.h] = [this.h, this.w];
         this.moveTo(this.x - (this.w - this.h) / 2, this.y + this.w - this.h);
-        this.standing = !this.standing;
+        this.isStanding = !this.isStanding;
     }
 
     startJumping(): void {
-        if (this.jumping || this.falling) return;
-        this.jumping = true;
-        this.verticalSpeed = this.standing ? -20 : -10;
-    }
-    stopJumping(): void {
-        this.jumping = false;
+        if (this.isJumping || this.isFalling) return;
+        this.isJumping = true;
+        this.verticalSpeed = this.isStanding ? -20 : -10;
     }
 }
