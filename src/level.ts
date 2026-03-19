@@ -8,7 +8,7 @@ export class Level {
     background: Rect;
     gravity: number;
 
-    constructor(startX: number, startY: number, rects: Rect[], backgroundColor: string, gravity: number = 2) {
+    constructor(startX: number, startY: number, rects: Rect[], backgroundColor: string, gravity: number = 5) {
         this.rects = rects;
         this.player = new Player(startX, startY);
         this.background = new Rect(0,0,900,900,backgroundColor);

@@ -18,7 +18,7 @@ export function applyPhysics(level: Level): void {
         player.isJumping = false;
     }
 
-    player.applySpeed();
+    if (!sweptAABB(player, level.rects)) player.applySpeed();
     getCollisionsAndResolve(level);
 }
 
@@ -47,6 +47,13 @@ function checkCollision(rect: Rect, player: Rect): boolean {
     if ((player.x + player.w <= rect.x || player.x >= rect.x + rect.w)) return false;
     if ((player.y + player.h <= rect.y || player.y >= rect.y + rect.h)) return false;
     return true;
+}
+
+function collidesOnX(rect: Rect, player: Rect) {
+    return !(player.x + player.w <= rect.x || player.x >= rect.x + rect.w);
+}
+function collidesOnY(rect: Rect, player: Rect) {
+    return !(player.y + player.h <= rect.y || player.y >= rect.y + rect.h);
 }
 
 function resolveCollisions(collidedRects: Rect[], player: Player): void {
@@ -142,4 +149,59 @@ function isHittingCeiling(player: Rect, level: Level): boolean {
         }
     }
     return false;
+}
+
+function findFirstCollisions(player: Player, rect: Rect): [number, number] {
+    let DX;
+    let DY;
+    const playerCenter = calculateCenter(player);
+    const rectCenter = calculateCenter(rect);
+    if (playerCenter[0] < rectCenter[0]) {
+        DX = Math.abs(rect.x - (player.x + player.w));
+    } else {
+        DX = Math.abs(rect.x + rect.w - player.x);
+    }
+    if (playerCenter[1] < rectCenter[1]) {
+        DY = Math.abs(rect.y - (player.y + player.h));
+    } else {
+        DY = Math.abs(rect.y + rect.h - player.y);
+    }
+    let xTime = (player.horizontalSpeed === 0 && collidesOnX(rect, player)) ? 0 : DX / player.horizontalSpeed;
+    let yTime = (player.verticalSpeed === 0 && collidesOnY(rect, player)) ? 0: DY / player.verticalSpeed;
+    return [xTime, yTime];
+}
+
+function findLastCollisions(player: Player, rect: Rect): [number, number]{
+    let DX;
+    let DY;
+    const playerCenter = calculateCenter(player);
+    const rectCenter = calculateCenter(rect);
+    if (playerCenter[0] < rectCenter[0]) {
+        DX = Math.abs(rect.x + rect.w - player.x);
+    } else {
+        DX = Math.abs(rect.x - (player.x + player.w));
+    }
+    if (playerCenter[1] < rectCenter[1]) {
+        DY = Math.abs(rect.y + rect.h - player.y);
+    } else {
+        DY = Math.abs(rect.y - (player.y + player.h));
+    }
+    let xTime = (player.horizontalSpeed === 0 && collidesOnX(rect, player)) ? 1: DX / player.horizontalSpeed;
+    let yTime = (player.verticalSpeed === 0 && collidesOnY(rect, player)) ? 1: DY / player.verticalSpeed;
+    return [xTime, yTime];
+}
+
+function sweptAABB(player: Player, rects: Rect[]) {
+    let collisionFound = false;
+    for (const rect of rects) {
+        const firstVector = findFirstCollisions(player, rect);
+        const lastVector = findLastCollisions(player, rect);
+        const earliestCollision = Math.max(...firstVector);
+        const latestCollision = Math.min(...lastVector);
+        if (earliestCollision <= latestCollision && earliestCollision <= 1 && earliestCollision >= 0){
+            player.move(earliestCollision * player.horizontalSpeed, earliestCollision * player.verticalSpeed);
+            collisionFound = true;
+        }
+    }
+    return collisionFound;
 }
