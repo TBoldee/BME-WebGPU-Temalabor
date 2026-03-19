@@ -25,11 +25,8 @@ const levels: Level[] = [];
 const testLevel: Level = new Level (
         200, 200,
         [{ x: 0,   y: 800, w: 900, h: 100, color: colors["orange"] },
-        // left wall
         { x: 0,   y: 0,   w: 50,  h: 900, color: colors["orange"] },
-        // right wall
         { x: 850, y: 0,   w: 50,  h: 900, color: colors["orange"] },
-        // platforms
         { x: 200, y: 550, w: 210, h: 30,  color: colors["orange"] },
         { x: 600, y: 550, w: 50,  h: 100,  color: colors["orange"] },
         { x: 450, y: 550, w: 70,  h: 30,  color: colors["orange"] },
