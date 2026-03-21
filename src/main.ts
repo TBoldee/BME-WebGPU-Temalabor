@@ -15,7 +15,7 @@ function frame(currentTime: number) {
         lastTime = currentTime;
     }
 
-    const delta = currentTime - lastTime;
+    const delta = Math.min(currentTime - lastTime, 250);
     timeAccumulator += delta;
     while (timeAccumulator >= timeStep){
         applyPhysics(currentLevel);

@@ -25,7 +25,7 @@ export class Player extends Rect {
 
     applyGravity(g: number){
         let gravity = Math.abs(g);
-        const terminalVelocity: number = 160;//Math.floor(this.h/2);
+        const terminalVelocity: number = Math.floor(this.h/2);
         if (this.verticalSpeed == 0) {
             this.verticalSpeed = gravity;
             this.isJumping = false;

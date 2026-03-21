@@ -18,7 +18,7 @@ export function applyPhysics(level: Level): void {
         player.isJumping = false;
     }
 
-    if (!sweptAABB(player, level.rects)) player.applySpeed();
+    sweptAABB(player, level.rects);
     getCollisionsAndResolve(level);
 }
 
@@ -61,9 +61,12 @@ function resolveCollisions(collidedRects: Rect[], player: Player): void {
     const [MTVX, MTVY] = calculateMinimumTranslationVector(smallestMTVRect, player);
 
     if (MTVY <= MTVX || (player.isFalling && player.horizontalSpeed === 0))  { //prefer vertical resolution if player is falling and not moving
-        player.move(0, MTVY * calculateMoveDirection(smallestMTVRect, player, "y"));
+        let dir = calculateMoveDirection(smallestMTVRect, player, "y");
+        player.move(0, MTVY * dir);
     } else if (MTVX < MTVY) {
-        player.move(MTVX * calculateMoveDirection(smallestMTVRect, player, "x"),0);
+        let dir = calculateMoveDirection(smallestMTVRect, player, "x");
+        dir === 1 ? player.stopMoveLeft() : player.stopMoveRight();
+        player.move(MTVX * dir,0);
     }
 }
 
@@ -154,54 +157,85 @@ function isHittingCeiling(player: Rect, level: Level): boolean {
 function findFirstCollisions(player: Player, rect: Rect): [number, number] {
     let DX;
     let DY;
-    const playerCenter = calculateCenter(player);
-    const rectCenter = calculateCenter(rect);
-    if (playerCenter[0] < rectCenter[0]) {
-        DX = Math.abs(rect.x - (player.x + player.w));
+    if (player.horizontalSpeed > 0) {
+        DX = rect.x - (player.x + player.w);
     } else {
-        DX = Math.abs(rect.x + rect.w - player.x);
+        DX = rect.x + rect.w - player.x;
     }
-    if (playerCenter[1] < rectCenter[1]) {
-        DY = Math.abs(rect.y - (player.y + player.h));
+    if (player.verticalSpeed > 0) {
+        DY = rect.y - (player.y + player.h);
     } else {
-        DY = Math.abs(rect.y + rect.h - player.y);
+        DY = rect.y + rect.h - player.y;
     }
-    let xTime = (player.horizontalSpeed === 0 && collidesOnX(rect, player)) ? 0 : DX / player.horizontalSpeed;
-    let yTime = (player.verticalSpeed === 0 && collidesOnY(rect, player)) ? 0: DY / player.verticalSpeed;
+    let xTime = (player.horizontalSpeed === 0 && collidesOnX(rect, player)) ? -Infinity : DX / player.horizontalSpeed;
+    if (player.horizontalSpeed === 0) {
+        if (collidesOnX(rect, player)) xTime  = -Infinity;
+        else xTime = Infinity;
+    } else xTime = DX / player.horizontalSpeed;
+
+    let yTime = (player.verticalSpeed === 0 && collidesOnY(rect, player)) ? -Infinity: DY / player.verticalSpeed;
+    if (player.verticalSpeed === 0) {
+        if (collidesOnY(rect, player)) yTime  = -Infinity;
+        else yTime = Infinity;
+    } else yTime = DY / player.verticalSpeed;
     return [xTime, yTime];
 }
 
 function findLastCollisions(player: Player, rect: Rect): [number, number]{
     let DX;
     let DY;
-    const playerCenter = calculateCenter(player);
-    const rectCenter = calculateCenter(rect);
-    if (playerCenter[0] < rectCenter[0]) {
-        DX = Math.abs(rect.x + rect.w - player.x);
+    if (player.horizontalSpeed > 0) {
+        DX = rect.x + rect.w - player.x;
     } else {
-        DX = Math.abs(rect.x - (player.x + player.w));
+        DX = rect.x - (player.x + player.w);
     }
-    if (playerCenter[1] < rectCenter[1]) {
-        DY = Math.abs(rect.y + rect.h - player.y);
+    if (player.verticalSpeed > 0) {
+        DY = rect.y + rect.h - player.y;
     } else {
-        DY = Math.abs(rect.y - (player.y + player.h));
+        DY = rect.y - (player.y + player.h);
     }
-    let xTime = (player.horizontalSpeed === 0 && collidesOnX(rect, player)) ? 1: DX / player.horizontalSpeed;
-    let yTime = (player.verticalSpeed === 0 && collidesOnY(rect, player)) ? 1: DY / player.verticalSpeed;
+    let xTime = (player.horizontalSpeed === 0 && collidesOnX(rect, player)) ? Infinity : DX / player.horizontalSpeed;
+    if (player.horizontalSpeed === 0) {
+        if (collidesOnX(rect, player)) xTime  = Infinity;
+        else xTime = -Infinity;
+    } else xTime = DX / player.horizontalSpeed;
+
+    let yTime = (player.verticalSpeed === 0 && collidesOnY(rect, player)) ? Infinity : DY / player.verticalSpeed;
+    if (player.verticalSpeed === 0) {
+        if (collidesOnY(rect, player)) yTime  = Infinity;
+        else yTime = -Infinity;
+    } else yTime = DY / player.verticalSpeed;
+
     return [xTime, yTime];
 }
 
 function sweptAABB(player: Player, rects: Rect[]) {
-    let collisionFound = false;
+    let minEntryTime = 1;
+    let entryNormalForCollision = [0,0];
+
     for (const rect of rects) {
-        const firstVector = findFirstCollisions(player, rect);
-        const lastVector = findLastCollisions(player, rect);
-        const earliestCollision = Math.max(...firstVector);
-        const latestCollision = Math.min(...lastVector);
-        if (earliestCollision <= latestCollision && earliestCollision <= 1 && earliestCollision >= 0){
-            player.move(earliestCollision * player.horizontalSpeed, earliestCollision * player.verticalSpeed);
-            collisionFound = true;
+        const entryVector = findFirstCollisions(player, rect);
+        const exitVector = findLastCollisions(player, rect);
+        const entryTime = Math.max(...entryVector);
+        const exitTime = Math.min(...exitVector);
+        if (entryTime <= 0.0001) continue;
+        if (entryTime <= exitTime && entryTime <= 1 && entryTime >= 0){
+            if (entryTime < minEntryTime) {
+                minEntryTime = entryTime;
+                if (entryTime === entryVector[0]) {
+                    entryNormalForCollision = [player.horizontalSpeed > 0 ? -1 : 1, 0];
+                } else {
+                    entryNormalForCollision = [0, player.verticalSpeed > 0 ? -1 : 1];
+                }
+            }
         }
     }
-    return collisionFound;
+    player.move(minEntryTime * player.horizontalSpeed, minEntryTime * player.verticalSpeed);
+    nullMovementBasedOnEntryNormal({x: entryNormalForCollision[0], y: entryNormalForCollision[1]}, player);
+}
+
+function nullMovementBasedOnEntryNormal({x, y}: {x: number; y: number}, player: Player) {
+    if (y !== 0) player.verticalSpeed = 0;
+    if (x === -1) player.stopMoveRight();
+    else if (x === 1) player.stopMoveLeft();
 }
