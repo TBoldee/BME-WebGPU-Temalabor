@@ -167,13 +167,13 @@ function findFirstCollisions(player: Player, rect: Rect): [number, number] {
     } else {
         DY = rect.y + rect.h - player.y;
     }
-    let xTime = (player.horizontalSpeed === 0 && collidesOnX(rect, player)) ? -Infinity : DX / player.horizontalSpeed;
+    let xTime: number;
     if (player.horizontalSpeed === 0) {
         if (collidesOnX(rect, player)) xTime  = -Infinity;
         else xTime = Infinity;
     } else xTime = DX / player.horizontalSpeed;
 
-    let yTime = (player.verticalSpeed === 0 && collidesOnY(rect, player)) ? -Infinity: DY / player.verticalSpeed;
+    let yTime: number;
     if (player.verticalSpeed === 0) {
         if (collidesOnY(rect, player)) yTime  = -Infinity;
         else yTime = Infinity;
@@ -194,13 +194,13 @@ function findLastCollisions(player: Player, rect: Rect): [number, number]{
     } else {
         DY = rect.y - (player.y + player.h);
     }
-    let xTime = (player.horizontalSpeed === 0 && collidesOnX(rect, player)) ? Infinity : DX / player.horizontalSpeed;
+    let xTime: number;
     if (player.horizontalSpeed === 0) {
         if (collidesOnX(rect, player)) xTime  = Infinity;
         else xTime = -Infinity;
     } else xTime = DX / player.horizontalSpeed;
 
-    let yTime = (player.verticalSpeed === 0 && collidesOnY(rect, player)) ? Infinity : DY / player.verticalSpeed;
+    let yTime: number;
     if (player.verticalSpeed === 0) {
         if (collidesOnY(rect, player)) yTime  = Infinity;
         else yTime = -Infinity;
