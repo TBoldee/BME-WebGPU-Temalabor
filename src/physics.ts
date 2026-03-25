@@ -20,6 +20,7 @@ export function applyPhysics(level: Level): void {
 
     sweptAABB(player, level.rects);
     getCollisionsAndResolve(level);
+    if (checkGoal(level)) level.finish();
 }
 
 export function getCollisionsAndResolve(level: Level): void {
@@ -238,4 +239,8 @@ function nullMovementBasedOnEntryNormal({x, y}: {x: number; y: number}, player: 
     if (y !== 0) player.verticalSpeed = 0;
     if (x === -1) player.stopMoveRight();
     else if (x === 1) player.stopMoveLeft();
+}
+
+function checkGoal(level: Level){
+    return checkCollision(level.goal, level.player);
 }

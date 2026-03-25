@@ -4,25 +4,42 @@ import {Rect} from "./rect.ts";
 
 export class Level {
     rects: Rect[];
+    goal: Rect;
     player: Player;
     background: Rect;
     gravity: number;
 
-    constructor(startX: number, startY: number, rects: Rect[], backgroundColor: string, gravity: number = 5) {
+    private static currentLevelIndex: number = 0;
+
+    constructor(startX: number, startY: number, rects: Rect[], goal:Rect, backgroundColor: string, gravity: number = 2) {
         this.rects = rects;
         this.player = new Player(startX, startY);
+        this.goal = goal;
         this.background = new Rect(0,0,900,900,backgroundColor);
         this.gravity = gravity;
     }
 
     public static getCurrentLevel(): Level{
-        return levels[0];
+        return levels[this.currentLevelIndex];
+    }
+
+    finish(){
+        if (levels.length > Level.currentLevelIndex + 1) Level.currentLevelIndex++;
+    }
+
+    getRectsToRender(): Rect[] {
+        let rects: Rect[] = [];
+        rects.push(this.background);
+        rects.push(...this.rects);
+        rects.push(this.player);
+        rects.push(this.goal);
+        return rects;
     }
 }
 
 const levels: Level[] = [];
 
-const testLevel: Level = new Level (
+const levelOne: Level = new Level (
         200, 200,
         [{ x: 0,   y: 800, w: 900, h: 100, color: colors["orange"] },
         { x: 0,   y: 0,   w: 50,  h: 900, color: colors["orange"] },
@@ -39,7 +56,29 @@ const testLevel: Level = new Level (
         { x: 730, y: 460, w: 30, h: 120,  color: colors["orange"] },
         { x: 100, y: 620, w: 50,  h: 30,  color: colors["orange"] },
         { x: 500, y: 380, w: 200, h: 30,  color: colors["orange"] }],
+        { x: 715, y: 590, w: 30, h: 60,  color: colors["purple"] },
         "beige"
     );
 
-levels.push(testLevel);
+const levelTwo: Level = new Level (
+    200, 200,
+    [{ x: 0,   y: 800, w: 900, h: 100, color: colors["yellow"] },
+        { x: 0,   y: 0,   w: 50,  h: 900, color: colors["yellow"] },
+        { x: 850, y: 0,   w: 50,  h: 900, color: colors["yellow"] },
+        { x: 200, y: 550, w: 210, h: 30,  color: colors["yellow"] },
+        { x: 600, y: 550, w: 50,  h: 100,  color: colors["yellow"] },
+        { x: 450, y: 550, w: 70,  h: 30,  color: colors["yellow"] },
+        { x: 380, y: 460, w: 30,  h: 60,  color: colors["yellow"] },
+        { x: 840, y: 460, w: 30,  h: 5,  color: colors["yellow"] },
+        { x: 675, y: 550, w: 60,  h: 30,  color: colors["yellow"] },
+        { x: 600, y: 650, w: 160,  h: 30,  color: colors["yellow"] },
+        { x: 380, y: 460, w: 350, h: 30,  color: colors["yellow"] },
+        { x: 120, y: 700, w: 150, h: 30,  color: colors["yellow"] },
+        { x: 730, y: 460, w: 30, h: 120,  color: colors["yellow"] },
+        { x: 100, y: 620, w: 50,  h: 30,  color: colors["yellow"] },
+        { x: 500, y: 380, w: 200, h: 30,  color: colors["yellow"] }],
+        { x: 715, y: 590, w: 30, h: 60,  color: colors["purple"] },
+        "gray"
+    );
+
+levels.push(levelOne, levelTwo);

@@ -5,6 +5,7 @@ const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 let currentLevel: Level = Level.getCurrentLevel();
 
 canvas.addEventListener('mousedown', (event) => {
+    currentLevel = Level.getCurrentLevel();
     if (event.button === 0) {
         let rect = canvas.getBoundingClientRect();
         let x = event.clientX - rect.left;
@@ -16,6 +17,7 @@ canvas.addEventListener('mousedown', (event) => {
 });
 
 window.addEventListener('keydown', (event) => {
+    currentLevel = Level.getCurrentLevel();
     switch (event.key) {
         case 'W':
         case 'w':
@@ -43,6 +45,7 @@ window.addEventListener('keydown', (event) => {
 })
 
 window.addEventListener('keyup', (event) => {
+    currentLevel = Level.getCurrentLevel();
     switch (event.key) {
         case 'W':
         case 'w':

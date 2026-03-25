@@ -11,6 +11,7 @@ let lastTime = 0;
 let timeAccumulator = 0;
 
 function frame(currentTime: number) {
+    currentLevel = Level.getCurrentLevel();
     if (lastTime === 0) {
         lastTime = currentTime;
     }
