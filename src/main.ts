@@ -1,7 +1,8 @@
 import { Renderer } from './renderer.ts';
-import {applyPhysics} from "./physics.ts";
+import {applyPhysics, checkGoal} from "./physics.ts";
 import './input.ts';
 import {Level} from "./level.ts";
+import {responseFunction} from "./collisionResponse.ts";
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 const renderer = await Renderer.init(canvas);
@@ -19,7 +20,8 @@ function frame(currentTime: number) {
     const delta = Math.min(currentTime - lastTime, 250);
     timeAccumulator += delta;
     while (timeAccumulator >= timeStep){
-        applyPhysics(currentLevel);
+        applyPhysics(currentLevel, responseFunction);
+        if (checkGoal(currentLevel)) currentLevel.finish();
         timeAccumulator -= timeStep;
     }
 

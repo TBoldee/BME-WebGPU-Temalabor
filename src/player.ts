@@ -96,4 +96,13 @@ export class Player extends Rect {
         this.isJumping = true;
         this.verticalSpeed = this.isStanding ? -20 : -10;
     }
+
+    kill(){
+        this.stopMoveRight();
+        this.stopMoveLeft();
+        if (!this.isStanding) this.lieDown();
+        this.isFalling = false;
+        this.isJumping = false;
+        this.verticalSpeed = 0;
+    }
 }
