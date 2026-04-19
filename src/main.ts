@@ -11,7 +11,7 @@ const timeStep = 1000 / 60;
 let lastTime = 0;
 let timeAccumulator = 0;
 
-function frame(currentTime: number) {
+async function frame(currentTime: number) {
     currentLevel = Level.getCurrentLevel();
     if (lastTime === 0) {
         lastTime = currentTime;
@@ -27,7 +27,7 @@ function frame(currentTime: number) {
 
     lastTime = currentTime;
 
-    renderer.render(currentLevel);
+    renderer.render(currentLevel).catch(console.error);
     requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
