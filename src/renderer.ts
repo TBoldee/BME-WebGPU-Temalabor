@@ -7,9 +7,6 @@ import type { Level } from "./level.ts";
 import type { Rect } from "./rect.ts";
 import bricksUrl from './images/bricks.png';
 
-//todo: másik layout colored rectnek. A pipeline visszaállítása ami ki van commentezve.
-//todo: renderelés közben pipeline switchelés az alapján, hogy van e textúra. 2 helyen: vertex buffer elkészítésénél, meg a draw hívásnál
-
 // per vertex: x, y, u,v  →  4 floats × 4 bytes = 16 bytes
 const texturedLayout = {
     floats_per_vertex: 4,
@@ -82,7 +79,7 @@ export class Renderer {
     private texturedPipeline: GPURenderPipeline;
     private coloredPipeline: GPURenderPipeline;
     private canvas: HTMLCanvasElement;
-    private brickTexture: GPUTexture;
+    private bindGroups: GPUBindGroup[];
 
     private constructor(
         device: GPUDevice,
@@ -90,14 +87,14 @@ export class Renderer {
         texturedPipeline: GPURenderPipeline,
         coloredPipeline: GPURenderPipeline,
         canvas: HTMLCanvasElement,
-        texture: GPUTexture,
+        bindGroups: GPUBindGroup[],
     ) {
         this.device   = device;
         this.context  = context;
         this.texturedPipeline = texturedPipeline;
         this.coloredPipeline = coloredPipeline;
         this.canvas   = canvas;
-        this.brickTexture = texture;
+        this.bindGroups = bindGroups;
     }
 
     static async init(canvas: HTMLCanvasElement): Promise<Renderer> {
@@ -109,40 +106,11 @@ export class Renderer {
         const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
         context.configure({ device, format: presentationFormat });
 
-        const coloredPipeline = device.createRenderPipeline({
-            layout: 'auto',
-            vertex: {
-                module: device.createShaderModule({ code: quadVertWGSL }),
-                buffers: [{
-                    arrayStride: coloredLayout.bytes_per_vertex,
-                    attributes: [...coloredLayout.attributes],
-                }],
-            },
-            fragment: {
-                module: device.createShaderModule({ code: fragWGSL }),
-                targets: [{ format: presentationFormat }],
-            },
-            primitive: { topology: 'triangle-list' },
-        });
-
-        const texturedPipeline = device.createRenderPipeline({
-            layout: 'auto',
-            vertex: {
-                module: device.createShaderModule({ code: texturedQuadVertWGSL }),
-                buffers: [{
-                    arrayStride: texturedLayout.bytes_per_vertex,
-                    attributes: [...texturedLayout.attributes],
-                }],
-            },
-            fragment: {
-                module: device.createShaderModule({ code: texturedFragWGSL }),
-                targets: [{ format: presentationFormat }],
-            },
-            primitive: { topology: 'triangle-list' },
-        });
+        const coloredPipeline = Renderer.createPipelineFromLayout(device, quadVertWGSL, fragWGSL, coloredLayout.bytes_per_vertex, coloredLayout.attributes);
+        const texturedPipeline = Renderer.createPipelineFromLayout(device, texturedQuadVertWGSL, texturedFragWGSL, texturedLayout.bytes_per_vertex, texturedLayout.attributes);
 
         const source = await Renderer.loadImageBitmap(bricksUrl);
-        const texture = device.createTexture({
+        const brickTexture = device.createTexture({
             label: bricksUrl,
             format: 'rgba8unorm',
             size: [source.width, source.height],
@@ -153,11 +121,28 @@ export class Renderer {
 
         device.queue.copyExternalImageToTexture(
             { source, flipY: true },
-            { texture },
+            { texture: brickTexture },
             { width: source.width, height: source.height },
         );
 
-        const renderer = new Renderer(device, context, texturedPipeline, coloredPipeline, canvas, texture);
+        const sampler = device.createSampler({
+            addressModeU: 'repeat',
+            addressModeV: 'repeat',
+            magFilter: 'linear',
+            minFilter: 'linear',
+        });
+
+        const bindGroups: GPUBindGroup[] = [];
+        const brickBindGroup = device.createBindGroup({
+            layout: texturedPipeline.getBindGroupLayout(0),
+            entries: [
+                { binding: 0, resource: sampler },
+                { binding: 1, resource: brickTexture.createView() },
+            ]
+        });
+        bindGroups.push(brickBindGroup);
+
+        const renderer = new Renderer(device, context, texturedPipeline, coloredPipeline, canvas, bindGroups);
         renderer.resizeCanvas(canvas);
         new ResizeObserver(() => renderer.resizeCanvas(canvas)).observe(canvas);
         return renderer;
@@ -179,21 +164,6 @@ export class Renderer {
         const texturedVertexData = new Float32Array(texturedRects.length * texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex);
         const coloredVertexData = new Float32Array(coloredRects.length * coloredLayout.verts_per_quad * coloredLayout.floats_per_vertex);
         const indexData  = new Uint16Array(rects.length * texturedLayout.indices_per_quad);
-
-        const sampler = this.device.createSampler({
-            addressModeU: 'repeat',
-            addressModeV: 'repeat',
-            magFilter: 'linear',
-            minFilter: 'linear',
-        });
-
-        const bindGroup = this.device.createBindGroup({
-            layout: this.texturedPipeline.getBindGroupLayout(0),
-            entries: [
-                { binding: 0, resource: sampler },
-                { binding: 1, resource: this.brickTexture.createView() },
-            ]
-        });
 
         let texturedOffset = 0;
         let coloredOffset = 0;
@@ -249,9 +219,10 @@ export class Renderer {
         texturedOffset = 0;
         coloredOffset = 0;
         for (let i = 0; i < rects.length; i++) {
-            if (rects[i].texture) {
+            const rect: Rect = rects[i];
+            if (rect.texture) {
                 passEncoder.setPipeline(this.texturedPipeline);
-                passEncoder.setBindGroup(0, bindGroup);
+                passEncoder.setBindGroup(0, this.getBindGroupForTexture(rect.texture!));
                 passEncoder.setVertexBuffer(0, texturedVertexBuffer, texturedOffset);
                 texturedOffset += texturedLayout.verts_per_quad * texturedLayout.bytes_per_vertex;
             } else {
@@ -276,5 +247,33 @@ export class Renderer {
         const res = await fetch(url);
         const blob = await res.blob();
         return await createImageBitmap(blob, { colorSpaceConversion: 'none' });
+    }
+
+    private getBindGroupForTexture(texture: string): GPUBindGroup{
+        switch (texture) {
+            case "bricks":
+                return this.bindGroups[0];
+                break;
+        }
+    }
+
+    private static createPipelineFromLayout (device: GPUDevice, vertShader: string, fragmentShader: string, vertexBufferStride: number, attributes: Iterable<GPUVertexAttribute>)
+    :GPURenderPipeline {
+        const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
+        return device.createRenderPipeline({
+            layout: 'auto',
+            vertex: {
+                module: device.createShaderModule({ code: vertShader }),
+                buffers: [{
+                    arrayStride: vertexBufferStride,
+                    attributes: [...attributes],
+                }],
+            },
+            fragment: {
+                module: device.createShaderModule({ code: fragmentShader }),
+                targets: [{ format: presentationFormat }],
+            },
+            primitive: { topology: 'triangle-list' },
+        });
     }
 }
