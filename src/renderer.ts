@@ -7,57 +7,97 @@ import type { Level } from "./level.ts";
 import type { Rect } from "./rect.ts";
 import bricksUrl from './images/bricks.png';
 
+//todo: másik layout colored rectnek. A pipeline visszaállítása ami ki van commentezve.
+//todo: renderelés közben pipeline switchelés az alapján, hogy van e textúra. 2 helyen: vertex buffer elkészítésénél, meg a draw hívásnál
 
 // per vertex: x, y, u,v  →  4 floats × 4 bytes = 16 bytes
-const FLOATS_PER_VERTEX = 4;
-const BYTES_PER_VERTEX  = FLOATS_PER_VERTEX * 4;
-const VERTS_PER_QUAD    = 4;
-const INDICES_PER_QUAD  = 6;
+const texturedLayout = {
+    floats_per_vertex: 4,
+    bytes_per_vertex: 16,
+    verts_per_quad: 4,
+    indices_per_quad: 6,
+    attributes: [
+        { shaderLocation: 0, offset: 0,     format: 'float32x2' }, // pos
+        { shaderLocation: 1, offset: 2 * 4, format: 'float32x2' }, // uv
+    ] satisfies GPUVertexAttribute[],
+}
+
+// per vertex: x, y, r, g, b, a →  6 floats × 4 bytes = 24 bytes
+const coloredLayout = {
+    floats_per_vertex: 6,
+    bytes_per_vertex: 24,
+    verts_per_quad: 4,
+    indices_per_quad: 6,
+    attributes: [
+        { shaderLocation: 0, offset: 0,     format: 'float32x2' }, // pos
+        { shaderLocation: 1, offset: 2 * 4, format: 'float32x4' }, // rgba
+    ] satisfies GPUVertexAttribute[],
+}
 
 const BASE_INDICES = [0, 1, 2, 0, 2, 3];
 
 function rectToVertices(
     x: number, y: number, w: number, h: number,
     sw: number, sh: number,
-    color: number[]
+    color?: number[], texture?: string,
 ): Float32Array {
+
     const toNDC = (px: number, py: number): [number, number] => [
         (px / sw) *  2 - 1,
-        (py / sh) * -2 + 1, //Y axis in clip space is +1 at the top and -1 at bottom, while pixel position is 0 at top and grows downwards. Calculation needs to be inverted.
+        (py / sh) * -2 + 1, //Y-axis in clip space is +1 at the top and -1 at bottom, while pixel position is 0 at top and grows downwards. Calculation needs to be inverted.
     ];
-    const tiling = 100;
-    const [r, g, b, a] = color;
-    const u = w / tiling;
-    const v = h / tiling;
     const tl = toNDC(x,     y    );
     const tr = toNDC(x + w, y    );
     const br = toNDC(x + w, y + h);
     const bl = toNDC(x,     y + h);
 
-    return new Float32Array([
-        ...tl, 0, 0,  // 0: top-left
-        ...tr, u, 0,  // 1: top-right
-        ...br, u, v,  // 2: bottom-right
-        ...bl, 0, v,  // 3: bottom-left
-    ]);
+    let vertexArray = new Float32Array([]);
+    let tiling, u, v, r, g, b, a;
+    if (texture) {
+        tiling = 100;
+        u = w / tiling;
+        v = h / tiling;
+        vertexArray = new Float32Array([
+            ...tl, 0,0,
+            ...tr, u,0,
+            ...br, u,v,
+            ...bl, 0,v,
+        ]);
+    } else if (color){
+        [r,g,b,a] = color;
+        vertexArray = new Float32Array([
+            ...tl, r,g,b,a,
+            ...tr, r,g,b,a,
+            ...br, r,g,b,a,
+            ...bl, r,g,b,a,
+        ])
+    }
+
+    return vertexArray;
 }
 
 export class Renderer {
     private device: GPUDevice;
     private context: GPUCanvasContext;
-    private pipeline: GPURenderPipeline;
+    private texturedPipeline: GPURenderPipeline;
+    private coloredPipeline: GPURenderPipeline;
     private canvas: HTMLCanvasElement;
+    private brickTexture: GPUTexture;
 
     private constructor(
         device: GPUDevice,
         context: GPUCanvasContext,
-        pipeline: GPURenderPipeline,
+        texturedPipeline: GPURenderPipeline,
+        coloredPipeline: GPURenderPipeline,
         canvas: HTMLCanvasElement,
+        texture: GPUTexture,
     ) {
         this.device   = device;
         this.context  = context;
-        this.pipeline = pipeline;
+        this.texturedPipeline = texturedPipeline;
+        this.coloredPipeline = coloredPipeline;
         this.canvas   = canvas;
+        this.brickTexture = texture;
     }
 
     static async init(canvas: HTMLCanvasElement): Promise<Renderer> {
@@ -69,16 +109,13 @@ export class Renderer {
         const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
         context.configure({ device, format: presentationFormat });
 
-        /*const pipeline = device.createRenderPipeline({
+        const coloredPipeline = device.createRenderPipeline({
             layout: 'auto',
             vertex: {
                 module: device.createShaderModule({ code: quadVertWGSL }),
                 buffers: [{
-                    arrayStride: BYTES_PER_VERTEX,
-                    attributes: [
-                        { shaderLocation: 0, offset: 0,     format: 'float32x2' }, // pos
-                        { shaderLocation: 1, offset: 2 * 4, format: 'float32x4' }, // color
-                    ],
+                    arrayStride: coloredLayout.bytes_per_vertex,
+                    attributes: [...coloredLayout.attributes],
                 }],
             },
             fragment: {
@@ -86,18 +123,15 @@ export class Renderer {
                 targets: [{ format: presentationFormat }],
             },
             primitive: { topology: 'triangle-list' },
-        });*/
+        });
 
-        const pipeline2 = device.createRenderPipeline({
+        const texturedPipeline = device.createRenderPipeline({
             layout: 'auto',
             vertex: {
                 module: device.createShaderModule({ code: texturedQuadVertWGSL }),
                 buffers: [{
-                    arrayStride: BYTES_PER_VERTEX,
-                    attributes: [
-                        { shaderLocation: 0, offset: 0,     format: 'float32x2' }, // pos
-                        { shaderLocation: 1, offset: 2 * 4, format: 'float32x2' }, // uv
-                    ],
+                    arrayStride: texturedLayout.bytes_per_vertex,
+                    attributes: [...texturedLayout.attributes],
                 }],
             },
             fragment: {
@@ -107,7 +141,23 @@ export class Renderer {
             primitive: { topology: 'triangle-list' },
         });
 
-        const renderer = new Renderer(device, context, pipeline2, canvas);
+        const source = await Renderer.loadImageBitmap(bricksUrl);
+        const texture = device.createTexture({
+            label: bricksUrl,
+            format: 'rgba8unorm',
+            size: [source.width, source.height],
+            usage: GPUTextureUsage.TEXTURE_BINDING |
+                GPUTextureUsage.COPY_DST |
+                GPUTextureUsage.RENDER_ATTACHMENT,
+        });
+
+        device.queue.copyExternalImageToTexture(
+            { source, flipY: true },
+            { texture },
+            { width: source.width, height: source.height },
+        );
+
+        const renderer = new Renderer(device, context, texturedPipeline, coloredPipeline, canvas, texture);
         renderer.resizeCanvas(canvas);
         new ResizeObserver(() => renderer.resizeCanvas(canvas)).observe(canvas);
         return renderer;
@@ -123,26 +173,12 @@ export class Renderer {
         let rects: Rect[] = level.getRectsToRender();
         const sw = this.canvas.width;
         const sh = this.canvas.height;
+        let texturedRects: Rect[] = rects.filter(r => r.texture);
+        let coloredRects: Rect[] = rects.filter(r => !r.texture);
 
-        const vertexData = new Float32Array(rects.length * VERTS_PER_QUAD * FLOATS_PER_VERTEX);
-        const indexData  = new Uint16Array(rects.length * INDICES_PER_QUAD);
-
-        //const url = 'https://webgpufundamentals.org/webgpu/resources/images/f-texture.png';
-        const source = await Renderer.loadImageBitmap(bricksUrl);
-        const texture = this.device.createTexture({
-            label: bricksUrl,
-            format: 'rgba8unorm',
-            size: [source.width, source.height],
-            usage: GPUTextureUsage.TEXTURE_BINDING |
-                GPUTextureUsage.COPY_DST |
-                GPUTextureUsage.RENDER_ATTACHMENT,
-        });
-
-        this.device.queue.copyExternalImageToTexture(
-            { source, flipY: true },
-            { texture },
-            { width: source.width, height: source.height },
-        );
+        const texturedVertexData = new Float32Array(texturedRects.length * texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex);
+        const coloredVertexData = new Float32Array(coloredRects.length * coloredLayout.verts_per_quad * coloredLayout.floats_per_vertex);
+        const indexData  = new Uint16Array(rects.length * texturedLayout.indices_per_quad);
 
         const sampler = this.device.createSampler({
             addressModeU: 'repeat',
@@ -152,27 +188,47 @@ export class Renderer {
         });
 
         const bindGroup = this.device.createBindGroup({
-            layout: this.pipeline.getBindGroupLayout(0),
+            layout: this.texturedPipeline.getBindGroupLayout(0),
             entries: [
                 { binding: 0, resource: sampler },
-                { binding: 1, resource: texture.createView() },
+                { binding: 1, resource: this.brickTexture.createView() },
             ]
         });
 
+        let texturedOffset = 0;
+        let coloredOffset = 0;
         for (let i = 0; i < rects.length; i++) {
-            const { x, y, w, h, color = [1, 1, 1, 1] } = rects[i];
-            vertexData.set(rectToVertices(x, y, w, h, sw, sh, color), i * VERTS_PER_QUAD * FLOATS_PER_VERTEX);
-            const base = i * VERTS_PER_QUAD;
-            for (let j = 0; j < INDICES_PER_QUAD; j++) {
-                indexData[i * INDICES_PER_QUAD + j] = BASE_INDICES[j] + base;
+            const { x, y, w, h, color = [1, 1, 1, 1], texture } = rects[i];
+            if (rects[i].texture){
+                texturedVertexData.set(rectToVertices(x, y, w, h, sw, sh, color, texture), texturedOffset);
+                texturedOffset += texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex;
+            } else {
+                coloredVertexData.set(rectToVertices(x, y, w, h, sw, sh, color, texture), coloredOffset);
+                coloredOffset += coloredLayout.verts_per_quad * coloredLayout.floats_per_vertex;
+            }
+            const base = i * texturedLayout.verts_per_quad;
+            for (let j = 0; j < texturedLayout.indices_per_quad; j++) {
+                indexData[i * texturedLayout.indices_per_quad + j] = BASE_INDICES[j] + base;
             }
         }
 
-        const vertexBuffer = this.device.createBuffer({
-            size:  vertexData.byteLength,
-            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-        });
-        this.device.queue.writeBuffer(vertexBuffer, 0, vertexData);
+        let coloredVertexBuffer: GPUBuffer;
+        if (coloredVertexData.length > 0) {
+            coloredVertexBuffer = this.device.createBuffer({
+                size:  coloredVertexData.byteLength,
+                usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+            });
+            this.device.queue.writeBuffer(coloredVertexBuffer, 0, coloredVertexData);
+        }
+
+        let texturedVertexBuffer: GPUBuffer;
+        if (texturedVertexData.length > 0) {
+            texturedVertexBuffer = this.device.createBuffer({
+                size:  texturedVertexData.byteLength,
+                usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+            });
+            this.device.queue.writeBuffer(texturedVertexBuffer, 0, texturedVertexData);
+        }
 
         const indexBuffer = this.device.createBuffer({
             size:  indexData.byteLength,
@@ -190,16 +246,29 @@ export class Renderer {
             }],
         });
 
-        passEncoder.setPipeline(this.pipeline);
-        passEncoder.setBindGroup(0, bindGroup);
-        passEncoder.setVertexBuffer(0, vertexBuffer);
-        passEncoder.setIndexBuffer(indexBuffer, 'uint16');
-        passEncoder.drawIndexed(rects.length * INDICES_PER_QUAD);
+        texturedOffset = 0;
+        coloredOffset = 0;
+        for (let i = 0; i < rects.length; i++) {
+            if (rects[i].texture) {
+                passEncoder.setPipeline(this.texturedPipeline);
+                passEncoder.setBindGroup(0, bindGroup);
+                passEncoder.setVertexBuffer(0, texturedVertexBuffer, texturedOffset);
+                texturedOffset += texturedLayout.verts_per_quad * texturedLayout.bytes_per_vertex;
+            } else {
+                passEncoder.setPipeline(this.coloredPipeline);
+                passEncoder.setVertexBuffer(0, coloredVertexBuffer, coloredOffset);
+                coloredOffset += coloredLayout.verts_per_quad * coloredLayout.bytes_per_vertex;
+            }
+            passEncoder.setIndexBuffer(indexBuffer, 'uint16');
+            passEncoder.drawIndexed(6);
+        }
+
         passEncoder.end();
 
         this.device.queue.submit([commandEncoder.finish()]);
 
-        vertexBuffer.destroy();
+        texturedVertexBuffer?.destroy();
+        coloredVertexBuffer?.destroy();
         indexBuffer.destroy();
     }
 

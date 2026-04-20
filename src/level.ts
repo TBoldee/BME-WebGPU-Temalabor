@@ -56,11 +56,11 @@ const levels: Level[] = [];
 const levelOne: Level = new Level (
     100, 500,
     [
-        { x: 0,   y: 0,   w: 900,  h: 400, color: colors["orange"] }, //top block
-        { x: 0,   y: 600, w: 450, h: 300, color: colors["orange"] }, //left bottom block
-        { x: 450,   y: 520, w: 450, h: 380, color: colors["orange"] }, //right bottom block
-        { x: 850, y: 400,   w: 50,  h: 120, color: colors["orange"] }, //right wall
-        { x: 0, y: 400,   w: 50,  h: 200, color: colors["orange"] }, //left wall
+        { x: 0,   y: 0,   w: 900,  h: 400, color: colors["orange"], texture: "bricks" }, //top block
+        { x: 0,   y: 600, w: 450, h: 300, color: colors["orange"], texture: "bricks" }, //left bottom block
+        { x: 450,   y: 520, w: 450, h: 380, color: colors["orange"], texture: "bricks" }, //right bottom block
+        { x: 850, y: 400,   w: 50,  h: 120, color: colors["orange"], texture: "bricks" }, //right wall
+        { x: 0, y: 400,   w: 50,  h: 200, color: colors["orange"], texture: "bricks" }, //left wall
     ],
     [],
     { x: 750, y: 460, w: 30, h: 60,  color: colors["purple"] },
