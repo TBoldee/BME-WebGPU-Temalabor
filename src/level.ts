@@ -70,19 +70,38 @@ const levelOne: Level = new Level (
 const levelTwo: Level = new Level (
     100, 450,
     [
-        { x: 0,   y: 0,   w: 900, h: 400, color: colors["orange"] }, //top block
-        { x: 50,   y: 550, w: 100, h: 50, color: colors["orange"] }, //spawn platform
-        { x: 250,   y: 550, w: 150, h: 50, color: colors["orange"] }, //first platform
-        { x: 500,   y: 550, w: 150, h: 50, color: colors["orange"] }, //second platform
-        { x: 750,   y: 550, w: 100, h: 50, color: colors["orange"] }, //third platform
-        { x: 0, y: 800, w: 900, h: 100, color: colors["orange"] }, //bottom block
-        { x: 850, y: 400, w: 50,  h: 400, color: colors["orange"] }, //right wall
-        { x: 0,   y: 400, w: 50,  h: 400, color: colors["orange"] }, //left wall
+        { x: 0,   y: 0,   w: 900, h: 384, color: colors["orange"], texture: "bricks" }, //top block
+        { x: 64,   y: 576, w: 100, h: 50, color: colors["orange"], texture: "bricks" }, //spawn platform
+        { x: 250,   y: 576, w: 150, h: 50, color: colors["orange"], texture: "bricks" }, //first platform
+        { x: 500,   y: 576, w: 150, h: 50, color: colors["orange"], texture: "bricks" }, //second platform
+        { x: 750,   y: 576, w: 100, h: 50, color: colors["orange"], texture: "bricks" }, //third platform
+        { x: 64, y: 832, w: 772, h: 68, color: colors["orange"], texture: "bricks" }, //bottom block
+        { x: 836, y: 384, w: 64,  h: 516, color: colors["orange"], texture: "bricks" }, //right wall
+        { x: 0,   y: 384, w: 64,  h: 516, color: colors["orange"], texture: "bricks" }, //left wall
     ],
     [
-        new Spike(50, 770, 800, 64), //bottom spike
+        new Spike(64, 768, 772, 64), //bottom spike
     ],
-    { x: 800, y: 490, w: 30, h: 60,  color: colors["purple"] },
+    { x: 800, y: 512, w: 32, h: 64,  color: colors["purple"], texture: "door" },
+    "beige"
+);
+
+const levelThree: Level = new Level (
+    100, 512,
+    [
+        { x: 0,   y: 0,   w: 900, h: 512, color: colors["orange"], texture: "bricks" }, //top block
+        { x: 64,   y: 576, w: 100, h: 50, color: colors["orange"], texture: "bricks" }, //spawn platform
+        { x: 250,   y: 576, w: 150, h: 50, color: colors["orange"], texture: "bricks" }, //first platform
+        { x: 500,   y: 576, w: 150, h: 50, color: colors["orange"], texture: "bricks" }, //second platform
+        { x: 750,   y: 576, w: 100, h: 50, color: colors["orange"], texture: "bricks" }, //third platform
+        { x: 64, y: 832, w: 772, h: 68, color: colors["orange"], texture: "bricks" }, //bottom block
+        { x: 836, y: 384, w: 64,  h: 516, color: colors["orange"], texture: "bricks" }, //right wall
+        { x: 0,   y: 384, w: 64,  h: 516, color: colors["orange"], texture: "bricks" }, //left wall
+    ],
+    [
+        new Spike(64, 768, 772, 64), //bottom spike
+    ],
+    { x: 800, y: 512, w: 32, h: 64,  color: colors["purple"], texture: "door" },
     "beige"
 );
 
@@ -129,5 +148,5 @@ const testTwo: Level = new Level (
     { x: 715, y: 590, w: 30, h: 60,  color: colors["purple"] },
     "gray"
 );
-
-levels.push( levelOne, levelTwo, testOne, testTwo);
+levels.push(levelOne, levelTwo, levelThree, testOne);
+//levels.push( levelOne, levelTwo, testOne, testTwo);
