@@ -56,14 +56,14 @@ const levels: Level[] = [];
 const levelOne: Level = new Level (
     100, 500,
     [
-        { x: 0,   y: 0,   w: 900,  h: 400, color: colors["orange"], texture: "bricks" }, //top block
-        { x: 0,   y: 600, w: 450, h: 300, color: colors["orange"], texture: "bricks" }, //left bottom block
-        { x: 450,   y: 520, w: 450, h: 380, color: colors["orange"], texture: "bricks" }, //right bottom block
-        { x: 850, y: 400,   w: 50,  h: 120, color: colors["orange"], texture: "bricks" }, //right wall
-        { x: 0, y: 400,   w: 50,  h: 200, color: colors["orange"], texture: "bricks" }, //left wall
+        { x: 0,   y: -40,   w: 900,  h: 448, color: colors["orange"], texture: "bricks" }, //top block
+        { x: 0,   y: 600, w: 900, h: 300, color: colors["orange"], texture: "bricks" }, //left bottom block
+        { x: 450,   y: 536, w: 450, h: 64, color: colors["orange"], texture: "bricks" }, //right bottom block
+        { x: 836, y: 408,   w: 64,  h: 128, color: colors["orange"], texture: "bricks" }, //right wall
+        { x: 0, y: 408,   w: 64,  h: 196, color: colors["orange"], texture: "bricks" }, //left wall
     ],
     [],
-    { x: 750, y: 460, w: 30, h: 60,  color: colors["purple"] },
+    { x: 750, y: 472, w: 32, h: 64,  color: colors["purple"], texture: "door" },
     "beige"
 );
 
@@ -80,7 +80,7 @@ const levelTwo: Level = new Level (
         { x: 0,   y: 400, w: 50,  h: 400, color: colors["orange"] }, //left wall
     ],
     [
-        new Spike(50, 770, 800, 30), //bottom spike
+        new Spike(50, 770, 800, 64), //bottom spike
     ],
     { x: 800, y: 490, w: 30, h: 60,  color: colors["purple"] },
     "beige"

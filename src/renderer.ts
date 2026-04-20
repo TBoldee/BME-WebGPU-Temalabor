@@ -6,6 +6,21 @@ import { quitIfWebGPUNotAvailableOrMissingFeatures } from '../util/util.ts';
 import type { Level } from "./level.ts";
 import type { Rect } from "./rect.ts";
 import bricksUrl from './images/bricks.png';
+import lavaUrl from './images/lava.png';
+import doorUrl from './images/door.png';
+
+type textureProps = {
+    url: string;
+    name: string;
+    tilingX: number;
+    tilingY: number;
+}
+const textureURLs:textureProps[] = [
+    {url: bricksUrl, name: "bricks", tilingX: 64, tilingY: 64},
+    {url: lavaUrl, name: "lava", tilingX:64, tilingY: 64},
+    {url: doorUrl, name: "door", tilingX:32, tilingY: 64}
+];
+
 
 // per vertex: x, y, u,v  →  4 floats × 4 bytes = 16 bytes
 const texturedLayout = {
@@ -49,11 +64,13 @@ function rectToVertices(
     const bl = toNDC(x,     y + h);
 
     let vertexArray = new Float32Array([]);
-    let tiling, u, v, r, g, b, a;
+    let tilingX, tilingY, u, v, r, g, b, a;
     if (texture) {
-        tiling = 100;
-        u = w / tiling;
-        v = h / tiling;
+        const textureProps = textureURLs.find(t => t.name === texture);
+        tilingX = textureProps.tilingX;
+        tilingY = textureProps.tilingY;
+        u = w / tilingX;
+        v = h / tilingY;
         vertexArray = new Float32Array([
             ...tl, 0,0,
             ...tr, u,0,
@@ -109,22 +126,6 @@ export class Renderer {
         const coloredPipeline = Renderer.createPipelineFromLayout(device, quadVertWGSL, fragWGSL, coloredLayout.bytes_per_vertex, coloredLayout.attributes);
         const texturedPipeline = Renderer.createPipelineFromLayout(device, texturedQuadVertWGSL, texturedFragWGSL, texturedLayout.bytes_per_vertex, texturedLayout.attributes);
 
-        const source = await Renderer.loadImageBitmap(bricksUrl);
-        const brickTexture = device.createTexture({
-            label: bricksUrl,
-            format: 'rgba8unorm',
-            size: [source.width, source.height],
-            usage: GPUTextureUsage.TEXTURE_BINDING |
-                GPUTextureUsage.COPY_DST |
-                GPUTextureUsage.RENDER_ATTACHMENT,
-        });
-
-        device.queue.copyExternalImageToTexture(
-            { source, flipY: true },
-            { texture: brickTexture },
-            { width: source.width, height: source.height },
-        );
-
         const sampler = device.createSampler({
             addressModeU: 'repeat',
             addressModeV: 'repeat',
@@ -133,14 +134,33 @@ export class Renderer {
         });
 
         const bindGroups: GPUBindGroup[] = [];
-        const brickBindGroup = device.createBindGroup({
-            layout: texturedPipeline.getBindGroupLayout(0),
-            entries: [
-                { binding: 0, resource: sampler },
-                { binding: 1, resource: brickTexture.createView() },
-            ]
-        });
-        bindGroups.push(brickBindGroup);
+        for (const txtr of textureURLs) {
+            const source = await Renderer.loadImageBitmap(txtr.url);
+            const texture = device.createTexture({
+                label: txtr.url,
+                format: 'rgba8unorm',
+                size: [source.width, source.height],
+                usage: GPUTextureUsage.TEXTURE_BINDING |
+                    GPUTextureUsage.COPY_DST |
+                    GPUTextureUsage.RENDER_ATTACHMENT,
+            });
+
+            device.queue.copyExternalImageToTexture(
+                { source, flipY: false },
+                { texture: texture },
+                { width: source.width, height: source.height },
+            );
+
+            bindGroups.push(
+                device.createBindGroup({
+                    layout: texturedPipeline.getBindGroupLayout(0),
+                    entries: [
+                        { binding: 0, resource: sampler },
+                        { binding: 1, resource: texture.createView() },
+                    ]
+                })
+            );
+        }
 
         const renderer = new Renderer(device, context, texturedPipeline, coloredPipeline, canvas, bindGroups);
         renderer.resizeCanvas(canvas);
@@ -253,7 +273,10 @@ export class Renderer {
         switch (texture) {
             case "bricks":
                 return this.bindGroups[0];
-                break;
+            case "lava":
+                return this.bindGroups[1];
+            case "door":
+                return this.bindGroups[2];
         }
     }
 
@@ -271,7 +294,21 @@ export class Renderer {
             },
             fragment: {
                 module: device.createShaderModule({ code: fragmentShader }),
-                targets: [{ format: presentationFormat }],
+                targets: [{
+                    format: presentationFormat,
+                    blend: {
+                        color: {
+                            srcFactor: 'src-alpha',
+                            dstFactor: 'one-minus-src-alpha',
+                            operation: 'add',
+                        },
+                        alpha: {
+                            srcFactor: 'one',
+                            dstFactor: 'one-minus-src-alpha',
+                            operation: 'add',
+                        },
+                    },
+                }]
             },
             primitive: { topology: 'triangle-list' },
         });
