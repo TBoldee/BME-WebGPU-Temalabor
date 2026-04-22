@@ -79,10 +79,10 @@ const levelTwo: Level = new Level (
     [
         { x: 0,   y: 0,   w: 900, h: 384, color: colors["orange"], texture: "bricks" }, //top block
         { x: 64,   y: 576, w: 100, h: 64, color: colors["orange"], texture: "bricks" }, //spawn platform
-        { x: 250,   y: 576, w: 150, h: 64, color: colors["orange"], texture: "bricks" }, //first platform
-        { x: 500,   y: 576, w: 150, h: 64, color: colors["orange"], texture: "bricks" }, //second platform
+        { x: 250,   y: 576, w: 150, h: 64, color: colors["orange"], texture: "bones" }, //first platform
+        { x: 500,   y: 576, w: 150, h: 64, color: colors["orange"], texture: "bones" }, //second platform
         { x: 750,   y: 576, w: 100, h: 64, color: colors["orange"], texture: "bricks" }, //third platform
-        { x: 64, y: 832, w: 772, h: 68, color: colors["orange"], texture: "bricks" }, //bottom block
+        { x: 64, y: 832, w: 772, h: 68, color: colors["orange"], texture: "bones" }, //bottom block
         { x: 836, y: 384, w: 64,  h: 516, color: colors["orange"], texture: "bricks" }, //right wall
         { x: 0,   y: 384, w: 64,  h: 516, color: colors["orange"], texture: "bricks" }, //left wall
     ],
@@ -98,10 +98,10 @@ const levelThree: Level = new Level (
     [
         { x: 0,   y: 0,   w: 900, h: 512, color: colors["orange"], texture: "bricks" }, //top block
         { x: 64,   y: 576, w: 100, h: 64, color: colors["orange"], texture: "bricks" }, //spawn platform
-        { x: 250,   y: 576, w: 150, h: 64, color: colors["orange"], texture: "bricks" }, //first platform
-        { x: 500,   y: 576, w: 150, h: 64, color: colors["orange"], texture: "bricks" }, //second platform
+        { x: 250,   y: 576, w: 150, h: 64, color: colors["orange"], texture: "bones" }, //first platform
+        { x: 500,   y: 576, w: 150, h: 64, color: colors["orange"], texture: "bones" }, //second platform
         { x: 750,   y: 576, w: 100, h: 64, color: colors["orange"], texture: "bricks" }, //third platform
-        { x: 64, y: 832, w: 772, h: 68, color: colors["orange"], texture: "bricks" }, //bottom block
+        { x: 64, y: 832, w: 772, h: 68, color: colors["orange"], texture: "bones" }, //bottom block
         { x: 836, y: 384, w: 64,  h: 516, color: colors["orange"], texture: "bricks" }, //right wall
         { x: 0,   y: 384, w: 64,  h: 516, color: colors["orange"], texture: "bricks" }, //left wall
     ],
