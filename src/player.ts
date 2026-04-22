@@ -1,5 +1,4 @@
 import {Rect} from "./rect.ts";
-import {colors} from "../util/colors.ts";
 import {getCollidedRects} from "./physics.ts";
 
 export class Player extends Rect {
@@ -13,14 +12,13 @@ export class Player extends Rect {
     private speed: number;
 
     constructor(x: number, y: number) {
-        super(x,y,20,60);
+        super(x,y,24,64, "brown", "ghost");
         this.isFalling = false;
         this.isJumping = false;
         this.isStanding = true;
         this.horizontalSpeed = 0;
         this.verticalSpeed = 0;
         this.speed = 6;
-        this.color = colors["brown"];
     }
 
     applyGravity(g: number){
@@ -88,7 +86,13 @@ export class Player extends Rect {
     private lieDown(){
         [this.w, this.h] = [this.h, this.w];
         this.moveTo(this.x - (this.w - this.h) / 2, this.y + this.w - this.h);
-        this.isStanding = !this.isStanding;
+        if (this.isStanding) {
+            this.isStanding = false;
+            this.texture = "ghostLying";
+        } else {
+            this.isStanding = true;
+            this.texture = "ghost";
+        }
     }
 
     startJumping(): void {

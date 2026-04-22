@@ -5,9 +5,11 @@ import texturedQuadVertWGSL from '../shaders/textured_quad_vert.wgsl?raw';
 import { quitIfWebGPUNotAvailableOrMissingFeatures } from '../util/util.ts';
 import type { Level } from "./level.ts";
 import type { Rect } from "./rect.ts";
-import bricksUrl from './images/bricks.png';
+import bricksUrl from './images/purplebrick.png';
 import lavaUrl from './images/lava.png';
 import doorUrl from './images/door.png';
+import ghostUrl from './images/ghost.png';
+import ghostLyingUrl from './images/ghostLying.png';
 
 type textureProps = {
     url: string;
@@ -18,7 +20,9 @@ type textureProps = {
 const textureURLs:textureProps[] = [
     {url: bricksUrl, name: "bricks", tilingX: 64, tilingY: 64},
     {url: lavaUrl, name: "lava", tilingX:64, tilingY: 64},
-    {url: doorUrl, name: "door", tilingX:32, tilingY: 64}
+    {url: doorUrl, name: "door", tilingX:32, tilingY: 64},
+    {url: ghostUrl, name: "ghost", tilingX:24, tilingY: 64},
+    {url: ghostLyingUrl, name: "ghostLying", tilingX:64, tilingY: 24}
 ];
 
 
@@ -277,6 +281,10 @@ export class Renderer {
                 return this.bindGroups[1];
             case "door":
                 return this.bindGroups[2];
+            case "ghost":
+                return this.bindGroups[3];
+            case "ghostLying":
+                return this.bindGroups[4];
         }
     }
 

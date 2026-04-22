@@ -3,11 +3,10 @@ import type { Rect } from "./rect.ts";
 import {Player} from "./player.ts";
 import type {CollisionResponseHelper} from "./collisionResponse.ts";
 
-const canvas = document.querySelector('canvas') as HTMLCanvasElement;
-
 export function applyPhysics(level: Level, collisionResponseHandler: CollisionResponseHelper): void {
     const player = level.player;
-    if (player.y > canvas.height - player.h) return;
+    let collidedSpikes: Rect[] = getCollidedRects(level.spikes, player);
+    collisionResponseHandler(collidedSpikes, player, level);
 
     if (!isGrounded(player, level) || player.isJumping) {
         player.isFalling = true;
@@ -19,10 +18,10 @@ export function applyPhysics(level: Level, collisionResponseHandler: CollisionRe
         player.isJumping = false;
     }
 
-    sweptAABB(player, level.rects);
-    let collidedSpikes: Rect[] = getCollidedRects(level.spikes, player);
-    collisionResponseHandler(collidedSpikes, player, level);
+    sweptAABB(player, level.getRectsForCollision());
+
     getCollisionsAndResolve(level);
+    if (checkGoal(level)) level.finish();
 }
 
 export function getCollisionsAndResolve(level: Level): void {

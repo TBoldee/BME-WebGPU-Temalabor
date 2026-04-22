@@ -49,6 +49,13 @@ export class Level {
         rects.push(this.goal);
         return rects;
     }
+
+    getRectsForCollision(): Rect[] {
+        let rcts: Rect[] = [];
+        rcts.push(...this.rects);
+        rcts.push(...this.spikes);
+        return rcts;
+    }
 }
 
 const levels: Level[] = [];
@@ -64,17 +71,17 @@ const levelOne: Level = new Level (
     ],
     [],
     { x: 750, y: 472, w: 32, h: 64,  color: colors["purple"], texture: "door" },
-    "beige"
+    "indigo"
 );
 
 const levelTwo: Level = new Level (
     100, 450,
     [
         { x: 0,   y: 0,   w: 900, h: 384, color: colors["orange"], texture: "bricks" }, //top block
-        { x: 64,   y: 576, w: 100, h: 50, color: colors["orange"], texture: "bricks" }, //spawn platform
-        { x: 250,   y: 576, w: 150, h: 50, color: colors["orange"], texture: "bricks" }, //first platform
-        { x: 500,   y: 576, w: 150, h: 50, color: colors["orange"], texture: "bricks" }, //second platform
-        { x: 750,   y: 576, w: 100, h: 50, color: colors["orange"], texture: "bricks" }, //third platform
+        { x: 64,   y: 576, w: 100, h: 64, color: colors["orange"], texture: "bricks" }, //spawn platform
+        { x: 250,   y: 576, w: 150, h: 64, color: colors["orange"], texture: "bricks" }, //first platform
+        { x: 500,   y: 576, w: 150, h: 64, color: colors["orange"], texture: "bricks" }, //second platform
+        { x: 750,   y: 576, w: 100, h: 64, color: colors["orange"], texture: "bricks" }, //third platform
         { x: 64, y: 832, w: 772, h: 68, color: colors["orange"], texture: "bricks" }, //bottom block
         { x: 836, y: 384, w: 64,  h: 516, color: colors["orange"], texture: "bricks" }, //right wall
         { x: 0,   y: 384, w: 64,  h: 516, color: colors["orange"], texture: "bricks" }, //left wall
@@ -83,17 +90,17 @@ const levelTwo: Level = new Level (
         new Spike(64, 768, 772, 64), //bottom spike
     ],
     { x: 800, y: 512, w: 32, h: 64,  color: colors["purple"], texture: "door" },
-    "beige"
+    "indigo"
 );
 
 const levelThree: Level = new Level (
     100, 512,
     [
         { x: 0,   y: 0,   w: 900, h: 512, color: colors["orange"], texture: "bricks" }, //top block
-        { x: 64,   y: 576, w: 100, h: 50, color: colors["orange"], texture: "bricks" }, //spawn platform
-        { x: 250,   y: 576, w: 150, h: 50, color: colors["orange"], texture: "bricks" }, //first platform
-        { x: 500,   y: 576, w: 150, h: 50, color: colors["orange"], texture: "bricks" }, //second platform
-        { x: 750,   y: 576, w: 100, h: 50, color: colors["orange"], texture: "bricks" }, //third platform
+        { x: 64,   y: 576, w: 100, h: 64, color: colors["orange"], texture: "bricks" }, //spawn platform
+        { x: 250,   y: 576, w: 150, h: 64, color: colors["orange"], texture: "bricks" }, //first platform
+        { x: 500,   y: 576, w: 150, h: 64, color: colors["orange"], texture: "bricks" }, //second platform
+        { x: 750,   y: 576, w: 100, h: 64, color: colors["orange"], texture: "bricks" }, //third platform
         { x: 64, y: 832, w: 772, h: 68, color: colors["orange"], texture: "bricks" }, //bottom block
         { x: 836, y: 384, w: 64,  h: 516, color: colors["orange"], texture: "bricks" }, //right wall
         { x: 0,   y: 384, w: 64,  h: 516, color: colors["orange"], texture: "bricks" }, //left wall
@@ -102,7 +109,7 @@ const levelThree: Level = new Level (
         new Spike(64, 768, 772, 64), //bottom spike
     ],
     { x: 800, y: 512, w: 32, h: 64,  color: colors["purple"], texture: "door" },
-    "beige"
+    "indigo"
 );
 
 const testOne: Level = new Level (
@@ -114,7 +121,6 @@ const testOne: Level = new Level (
     { x: 600, y: 550, w: 50,  h: 100,  color: colors["orange"] },
     { x: 450, y: 550, w: 70,  h: 30,  color: colors["orange"] },
     { x: 380, y: 460, w: 30,  h: 60,  color: colors["orange"] },
-    { x: 840, y: 460, w: 30,  h: 5,  color: colors["orange"] },
     { x: 675, y: 550, w: 60,  h: 30,  color: colors["orange"] },
     { x: 600, y: 650, w: 160,  h: 30,  color: colors["orange"] },
     { x: 380, y: 460, w: 350, h: 30,  color: colors["orange"] },
@@ -122,7 +128,9 @@ const testOne: Level = new Level (
     { x: 730, y: 460, w: 30, h: 120,  color: colors["orange"] },
     { x: 100, y: 620, w: 50,  h: 30,  color: colors["orange"] },
     { x: 500, y: 380, w: 200, h: 30,  color: colors["orange"] }],
-    [],
+    [
+        new Spike(840, 460, 30, 5)
+    ],
     { x: 715, y: 590, w: 30, h: 60,  color: colors["purple"] },
     "beige"
 );
