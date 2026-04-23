@@ -1,10 +1,12 @@
 import {Player} from "./player.ts";
 import {Rect} from "./rect.ts";
 import {Spike} from "./spike.ts";
+import {Enemy} from "./enemy.ts"
 
 export class Level {
     rects: Rect[];
     spikes: Spike[];
+    enemies: Enemy[];
     goal: Rect;
     player: Player;
     background: Rect;
@@ -14,9 +16,11 @@ export class Level {
 
     private static currentLevelIndex: number = 0;
 
-    constructor(startX: number, startY: number, rects: Rect[], spikes: Spike[], goal:Rect, backgroundColor: string, gravity: number = 2) {
+    constructor(startX: number, startY: number, rects: Rect[], spikes: Spike[], enemies: Enemy[],
+                goal:Rect, backgroundColor: string, gravity: number = 2) {
         this.rects = rects;
         this.spikes = spikes;
+        this.enemies = enemies;
         this.startX = startX;
         this.startY = startY;
         this.player = new Player(startX, startY);
@@ -45,6 +49,7 @@ export class Level {
         rects.push(...this.rects);
         rects.push(this.player);
         rects.push(...this.spikes);
+        rects.push(...this.enemies);
         rects.push(this.goal);
         return rects;
     }
@@ -69,6 +74,7 @@ const levelOne: Level = new Level (
         new Rect(0, 408,64, 196, "orange", "bricks"), //left wall
     ],
     [],
+    [],
     new Rect(750, 472, 32, 64,"purple","door"),
     "indigo"
 );
@@ -88,6 +94,7 @@ const levelTwo: Level = new Level (
     [
         new Spike(64, 768, 772, 64), //bottom spike
     ],
+    [],
     new Rect( 800, 512, 32, 64,"purple","door"),
     "indigo"
 );
@@ -106,6 +113,29 @@ const levelThree: Level = new Level (
     ],
     [
         new Spike(64, 768, 772, 64), //bottom spike
+    ],
+    [],
+    new Rect( 800, 512, 32, 64,"purple","door"),
+    "indigo"
+);
+
+const levelFour: Level = new Level (
+    100, 500,
+    [
+        new Rect(0,    0,   900, 384, "orange", "bricks" ), //top block
+        new Rect(64,   576, 100, 64, "orange", "bricks"  ), //spawn platform
+        new Rect(250,  576, 150, 64, "orange", "bones", "left" ), //first platform
+        new Rect(500,  576, 150, 64, "orange", "bones", "left" ), //second platform
+        new Rect(750,  576, 100, 64, "orange", "bricks" ), //third platform
+        new Rect(64, 832, 772, 68, "orange", "bones" ), //bottom block
+        new Rect(836, 384, 64,  516, "orange", "bricks"), //right wall
+        new Rect(0,   384, 64,  516, "orange", "bricks"), //left wall
+    ],
+    [
+        new Spike(64, 768, 772, 64), //bottom spike
+    ],
+    [
+        new Enemy(450, 400, 550, 550, 30, 30)
     ],
     new Rect( 800, 512, 32, 64,"purple","door"),
     "indigo"
@@ -132,8 +162,9 @@ const testOne: Level = new Level (
     [
         new Spike(840, 460, 30, 5)
     ],
+    [],
     new Rect( 715, 590, 30, 60,"purple","door"),
     "beige"
 );
 
-levels.push(levelOne, levelTwo, levelThree, testOne);
+levels.push(levelOne, levelTwo, levelThree, levelFour, testOne);

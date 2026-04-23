@@ -1,11 +1,11 @@
 import {type Level} from "./level.ts";
-import type { Rect } from "./rect.ts";
+import { Rect } from "./rect.ts";
 import {Player} from "./player.ts";
 import type {CollisionResponseHelper} from "./collisionResponse.ts";
 
 export function applyPhysics(level: Level, collisionResponseHandler: CollisionResponseHelper): void {
     const player = level.player;
-    let collidedSpikes: Rect[] = getCollidedRects(level.spikes, player);
+    let collidedSpikes: Rect[] = getCollidedRects([...level.spikes, ...level.enemies], player);
     collisionResponseHandler(collidedSpikes, player, level);
 
     if (!isGrounded(player, level) || player.isJumping) {
@@ -17,7 +17,9 @@ export function applyPhysics(level: Level, collisionResponseHandler: CollisionRe
         player.verticalSpeed = 0;
         player.isJumping = false;
     }
-
+    for (const enemy of level.enemies) {
+        enemy.moveAlongPath();
+    }
     sweptAABB(player, level.getRectsForCollision());
 
     getCollisionsAndResolve(level);
@@ -125,13 +127,7 @@ function findRectWithSmallestMTV(rects: Rect[], player:Player): Rect {
 }
 
 function isGrounded(player: Rect, level: Level): boolean{
-    const groundCheckRect: Rect = {
-        x: player.x,
-        y: player.y + player.h,
-        w: player.w,
-        h: 1,
-        color: [0,0,0,0]
-    };
+    const groundCheckRect = new Rect(player.x, player.y + player.h, player.w, 1, "transparent")
     for (const rect of level.rects) {
         if (checkCollision(rect, groundCheckRect)){
             return true;
@@ -141,13 +137,7 @@ function isGrounded(player: Rect, level: Level): boolean{
 }
 
 function isHittingCeiling(player: Rect, level: Level): boolean {
-    const ceilingCheckRect: Rect = {
-        x: player.x,
-        y: player.y-1,
-        w: player.w,
-        h: 1,
-        color: [0,0,0,0]
-    };
+    const ceilingCheckRect = new Rect(player.x, player.y-1, player.w, 1, "transparent")
     for (const rect of level.rects) {
         if (checkCollision(rect, ceilingCheckRect)){
             return true;

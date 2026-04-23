@@ -37,16 +37,6 @@ export class Player extends Rect {
             if (this.verticalSpeed > terminalVelocity) this.verticalSpeed = terminalVelocity;
         }
     }
-
-    moveTo(x: number, y: number) {
-        this.x = Math.floor(x);
-        this.y = Math.floor(y);
-    }
-    move(x: number, y: number) {
-        this.x = Math.floor(this.x + x);
-        this.y = Math.floor(this.y + y);
-
-    }
     applySpeed(){
         this.x = Math.floor(this.x + this.horizontalSpeed);
         this.y = Math.floor(this.y + this.verticalSpeed);

@@ -18,4 +18,13 @@ export class Rect {
         this.color = colors[color as keyof typeof colors];
         this.texture = texture;
     }
+    moveTo(x: number, y: number) {
+        this.x = Math.floor(x);
+        this.y = Math.floor(y);
+    }
+
+    move(x: number, y: number) {
+        this.x = Math.floor(this.x + x);
+        this.y = Math.floor(this.y + y);
+    }
 }
