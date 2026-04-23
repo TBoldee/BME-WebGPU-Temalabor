@@ -12,7 +12,7 @@ export class Player extends Rect {
     private speed: number;
 
     constructor(x: number, y: number) {
-        super(x,y,24,64, "brown", "ghost");
+        super(x,y,24,64,"brown", "ghost");
         this.isFalling = false;
         this.isJumping = false;
         this.isStanding = true;
@@ -56,6 +56,7 @@ export class Player extends Rect {
         if (!this.isMovingLeft) {
             this.isMovingLeft = true;
             this.horizontalSpeed -= this.speed;
+            this.facing = "left";
         }
     }
     stopMoveLeft(){
@@ -68,6 +69,7 @@ export class Player extends Rect {
         if (!this.isMovingRight) {
             this.isMovingRight = true;
             this.horizontalSpeed += this.speed;
+            this.facing = "right";
         }
     }
     stopMoveRight(){

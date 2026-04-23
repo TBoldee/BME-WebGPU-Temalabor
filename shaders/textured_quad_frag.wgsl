@@ -1,6 +1,6 @@
 struct VertexOutput {
-    @builtin(position) pos:   vec4f,
-    @location(0)       texcoord: vec2f,
+    @builtin(position) pos: vec4f,
+    @location(0) texcoord: vec2f,
 }
 
 @group(0) @binding(0) var ourSampler: sampler;

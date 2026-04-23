@@ -55,7 +55,7 @@ const coloredLayout = {
 const BASE_INDICES = [0, 1, 2, 0, 2, 3];
 
 function rectToVertices(
-    x: number, y: number, w: number, h: number,
+    x: number, y: number, w: number, h: number, facing: "left" | "right",
     sw: number, sh: number,
     color?: number[], texture?: string,
 ): Float32Array {
@@ -77,12 +77,22 @@ function rectToVertices(
         tilingY = textureProps.tilingY;
         u = w / tilingX;
         v = h / tilingY;
-        vertexArray = new Float32Array([
-            ...tl, 0,0,
-            ...tr, u,0,
-            ...br, u,v,
-            ...bl, 0,v,
-        ]);
+        if (facing === "right"){
+            vertexArray = new Float32Array([
+                ...tl, 0,0,
+                ...tr, u,0,
+                ...br, u,v,
+                ...bl, 0,v,
+            ]);
+        } else if (facing === "left"){
+            vertexArray = new Float32Array([
+                ...tl, u,0,
+                ...tr, 0,0,
+                ...br, 0,v,
+                ...bl, u,v,
+            ]);
+        }
+
     } else if (color){
         [r,g,b,a] = color;
         vertexArray = new Float32Array([
@@ -112,11 +122,11 @@ export class Renderer {
         canvas: HTMLCanvasElement,
         bindGroups: GPUBindGroup[],
     ) {
-        this.device   = device;
-        this.context  = context;
+        this.device = device;
+        this.context = context;
         this.texturedPipeline = texturedPipeline;
         this.coloredPipeline = coloredPipeline;
-        this.canvas   = canvas;
+        this.canvas = canvas;
         this.bindGroups = bindGroups;
     }
 
@@ -194,12 +204,12 @@ export class Renderer {
         let texturedOffset = 0;
         let coloredOffset = 0;
         for (let i = 0; i < rects.length; i++) {
-            const { x, y, w, h, color = [1, 1, 1, 1], texture } = rects[i];
+            const { x, y, w, h, facing, color = [1, 1, 1, 1], texture } = rects[i];
             if (rects[i].texture){
-                texturedVertexData.set(rectToVertices(x, y, w, h, sw, sh, color, texture), texturedOffset);
+                texturedVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, color, texture), texturedOffset);
                 texturedOffset += texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex;
             } else {
-                coloredVertexData.set(rectToVertices(x, y, w, h, sw, sh, color, texture), coloredOffset);
+                coloredVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, color, texture), coloredOffset);
                 coloredOffset += coloredLayout.verts_per_quad * coloredLayout.floats_per_vertex;
             }
             const base = i * texturedLayout.verts_per_quad;
