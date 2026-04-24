@@ -41,6 +41,7 @@ export class Level {
 
     start() {
         this.player.moveTo(this.startX, this.startY);
+        this.enemies.forEach(enemy => enemy.reset());
     }
 
     getRectsToRender(): Rect[] {
@@ -135,7 +136,7 @@ const levelFour: Level = new Level (
         new Spike(64, 768, 772, 64), //bottom spike
     ],
     [
-        new Enemy(450, 400, 550, 550, 30, 30)
+        new Enemy(450, 400, 550, 550, 32, 32)
     ],
     new Rect( 800, 512, 32, 64,"purple","door"),
     "indigo"
