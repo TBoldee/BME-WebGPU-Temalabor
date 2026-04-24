@@ -11,6 +11,7 @@ import doorUrl from './images/door.png';
 import ghostUrl from './images/ghost.png';
 import ghostLyingUrl from './images/ghostLying.png';
 import bonesUrl from './images/bone.png';
+import demonUrl from './images/demonhead.png'
 
 type textureProps = {
     url: string;
@@ -25,6 +26,7 @@ const textureURLs:textureProps[] = [
     {url: ghostUrl, name: "ghost", tilingX:24, tilingY: 64},
     {url: ghostLyingUrl, name: "ghostLying", tilingX:64, tilingY: 24},
     {url: bonesUrl, name: "bones", tilingX: 64, tilingY: 64},
+    {url: demonUrl, name: "demon", tilingX: 64, tilingY: 64},
 ];
 
 
@@ -299,6 +301,8 @@ export class Renderer {
                 return this.bindGroups[4];
             case "bones":
                 return this.bindGroups[5];
+            case "demon":
+                return this.bindGroups[6];
         }
     }
 

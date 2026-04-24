@@ -9,8 +9,8 @@ export class Enemy extends Rect {
     verticalSpeed: number;
     speed: number;
     direction: "forward" | "backward";
-    constructor(x: number, y: number, endX: number, endY: number, w: number, h: number, speed: number = 25) {
-        super(x, y, w, h, "red", "lava");
+    constructor(x: number, y: number, endX: number, endY: number, w: number, h: number, speed: number = 35) {
+        super(x, y, w, h, "red", "demon");
         this.startX = x;
         this.startY = y;
         this.endX = endX;
@@ -23,8 +23,13 @@ export class Enemy extends Rect {
 
     moveAlongPath(){
         this.move(this.horizontalSpeed, this.verticalSpeed);
-        if ((this.direction === "forward" && this.x === this.endX && this.y === this.endY) ||
-            (this.direction === "backward" && this.x === this.startX && this.y === this.startY)) {
+        const passedGoalForward = (this.direction === "forward" &&
+            ((this.startX < this.endX && this.x >= this.endX) || (this.startX > this.endX && this.x <= this.endX ||
+            this.startY < this.endY && this.y >= this.endY) || (this.startY > this.endY && this.y <= this.endY)));
+        const passedGoalBackward = (this.direction === "backward" &&
+            ((this.startX < this.endX && this.x <= this.startX) || (this.startX > this.endX && this.x >= this.startX ||
+                this.startY < this.endY && this.y <= this.startY) || (this.startY > this.endY && this.y >= this.startY)))
+        if (passedGoalForward || passedGoalBackward) {
             if (this.horizontalSpeed !== 0 ){
                 this.horizontalSpeed *= -1;
                 if (this.horizontalSpeed < 0) this.facing = "left";

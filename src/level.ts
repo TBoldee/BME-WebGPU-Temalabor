@@ -136,7 +136,7 @@ const levelFour: Level = new Level (
         new Spike(64, 768, 772, 64), //bottom spike
     ],
     [
-        new Enemy(450, 400, 550, 550, 32, 32)
+        new Enemy(418, 400, 418, 660, 64, 64)
     ],
     new Rect( 800, 512, 32, 64,"purple","door"),
     "indigo"
