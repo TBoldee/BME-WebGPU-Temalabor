@@ -38,6 +38,10 @@ window.addEventListener('keydown', (event) => {
         case 'C':
             currentLevel.player.lieDownIfPossible(currentLevel.rects);
             break;
+        case 'r':
+            document.getElementById('victory').hidden = true;
+            Level.restartGame();
+            break;
         default:
             break;
     }

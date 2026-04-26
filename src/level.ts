@@ -13,7 +13,7 @@ export class Level {
     startX: number;
     startY: number;
     gravity: number;
-
+    static hasWon: boolean = false;
     private static currentLevelIndex: number = 0;
 
     constructor(startX: number, startY: number, rects: Rect[], spikes: Spike[], enemies: Enemy[],
@@ -30,18 +30,24 @@ export class Level {
     }
 
     public static getCurrentLevel(): Level{
-        return levels[this.currentLevelIndex];
+        return levels[Level.currentLevelIndex];
     }
 
     finish(){
         if (levels.length > Level.currentLevelIndex + 1) {
             levels[++Level.currentLevelIndex].start();
-        }
+        } else Level.hasWon = true;
     }
 
     start() {
         this.player.moveTo(this.startX, this.startY);
         this.enemies.forEach(enemy => enemy.reset());
+    }
+
+    static restartGame(){
+        this.hasWon = false;
+        this.currentLevelIndex = 0;
+        levels[Level.currentLevelIndex].start();
     }
 
     getRectsToRender(): Rect[] {

@@ -19,10 +19,12 @@ async function frame(currentTime: number) {
 
     const delta = Math.min(currentTime - lastTime, 250);
     timeAccumulator += delta;
-    while (timeAccumulator >= timeStep){
-        applyPhysics(currentLevel, responseFunction);
-        timeAccumulator -= timeStep;
-    }
+    if (!Level.hasWon){
+        while (timeAccumulator >= timeStep) {
+            applyPhysics(currentLevel, responseFunction);
+            timeAccumulator -= timeStep;
+        }
+    } else document.getElementById('victory').hidden = false;
 
     lastTime = currentTime;
 
