@@ -24,11 +24,11 @@ export class Enemy extends Rect {
     moveAlongPath(){
         this.move(this.horizontalSpeed, this.verticalSpeed);
         const passedGoalForward = (this.direction === "forward" &&
-            ((this.startX < this.endX && this.x >= this.endX) || (this.startX > this.endX && this.x <= this.endX ||
-            this.startY < this.endY && this.y >= this.endY) || (this.startY > this.endY && this.y <= this.endY)));
+            ((this.startX < this.endX && this.x >= this.endX) || (this.startX > this.endX && this.x <= this.endX) ||
+                (this.startY < this.endY && this.y >= this.endY) || (this.startY > this.endY && this.y <= this.endY)));
         const passedGoalBackward = (this.direction === "backward" &&
-            ((this.startX < this.endX && this.x <= this.startX) || (this.startX > this.endX && this.x >= this.startX ||
-                this.startY < this.endY && this.y <= this.startY) || (this.startY > this.endY && this.y >= this.startY)))
+            ((this.startX < this.endX && this.x <= this.startX) || (this.startX > this.endX && this.x >= this.startX) ||
+                (this.startY < this.endY && this.y <= this.startY) || (this.startY > this.endY && this.y >= this.startY)))
         if (passedGoalForward || passedGoalBackward) {
             if (this.horizontalSpeed !== 0 ){
                 this.horizontalSpeed *= -1;

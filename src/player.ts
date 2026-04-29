@@ -100,5 +100,6 @@ export class Player extends Rect {
         this.isFalling = false;
         this.isJumping = false;
         this.verticalSpeed = 0;
+        this.facing = "right";
     }
 }

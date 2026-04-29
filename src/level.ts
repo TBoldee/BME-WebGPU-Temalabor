@@ -47,6 +47,9 @@ export class Level {
     static restartGame(){
         this.hasWon = false;
         this.currentLevelIndex = 0;
+        for (const level of levels) {
+            level.player.kill();
+        }
         levels[Level.currentLevelIndex].start();
     }
 
@@ -142,7 +145,7 @@ const levelFour: Level = new Level (
         new Spike(64, 768, 772, 64), //bottom spike
     ],
     [
-        new Enemy(418, 400, 418, 660, 64, 64)
+        new Enemy(418, 400, 418, 660, 64, 64, 42)
     ],
     new Rect( 800, 512, 32, 64,"purple","door"),
     "indigo"
@@ -174,4 +177,4 @@ const testOne: Level = new Level (
     "beige"
 );
 
-levels.push(levelOne, levelTwo, levelThree, levelFour, testOne);
+levels.push(levelOne, levelTwo, levelThree, levelFour);
