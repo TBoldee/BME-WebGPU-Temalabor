@@ -12,6 +12,7 @@ import ghostUrl from './images/ghost.png';
 import ghostLyingUrl from './images/ghostLying.png';
 import bonesUrl from './images/bone.png';
 import demonUrl from './images/demonhead.png'
+import bricksAtlasUrl from './images/purplebrickatlas.png'
 
 type textureProps = {
     url: string;
@@ -27,6 +28,7 @@ const textureURLs:textureProps[] = [
     {url: ghostLyingUrl, name: "ghostLying", tilingX:64, tilingY: 24},
     {url: bonesUrl, name: "bones", tilingX: 64, tilingY: 64},
     {url: demonUrl, name: "demon", tilingX: 64, tilingY: 64},
+    {url: bricksAtlasUrl, name: "bricksAtlas", tilingX: 64, tilingY: 64},
 ];
 
 
@@ -54,12 +56,47 @@ const coloredLayout = {
     ] satisfies GPUVertexAttribute[],
 }
 
-//const BASE_INDICES = [0, 1, 2, 0, 2, 3];
+function getUVsFromVariant(variant: number){
+    switch (variant) {
+        case 0:
+            return [0, 0, 1/4, 1/4];
+        case 1:
+            return [0, 3/4, 1/4, 4/4];
+        case 2:
+            return [3/4, 3/4, 4/4, 4/4];
+        case 3:
+            return [3/4, 2/4, 4/4, 3/4];
+        case 4:
+            return [1/4, 3/4, 2/4, 4/4];
+        case 5:
+            return [1/4, 2/4, 2/4, 3/4];
+        case 6:
+            return [2/4, 3/4, 3/4, 4/4];
+        case 7:
+            return [2/4, 2/4, 3/4, 3/4];
+        case 8:
+            return [0, 1/4, 1/4, 2/4];
+        case 9:
+            return [0, 2/4, 1/4, 3/4];
+        case 10:
+            return [3/4, 0, 4/4, 1/4];
+        case 11:
+            return [3/4, 1/4, 4/4, 2/4];
+        case 12:
+            return [1/4, 0, 2/4, 1/4];
+        case 13:
+            return [1/4, 1/4, 2/4, 2/4];
+        case 14:
+            return [2/4, 0, 3/4, 1/4];
+        case 15:
+            return [2/4, 1/4, 3/4, 2/4];
+    }
+}
 
 function rectToVertices(
     x: number, y: number, w: number, h: number, facing: "left" | "right",
     sw: number, sh: number,
-    color?: number[], texture?: string,
+    variant: number, color?: number[], texture?: string,
 ): Float32Array {
 
     const toNDC = (px: number, py: number): [number, number] => [
@@ -72,26 +109,30 @@ function rectToVertices(
     const bl = toNDC(x,     y + h);
 
     let vertexArray = new Float32Array([]);
-    let tilingX, tilingY, u, v, r, g, b, a;
+    let tilingX, tilingY, startU, startV, endU, endV, r, g, b, a;
     if (texture) {
         const textureProps = textureURLs.find(t => t.name === texture);
-        tilingX = textureProps.tilingX;
-        tilingY = textureProps.tilingY;
-        u = w / tilingX;
-        v = h / tilingY;
+        if (texture !== "bricks"){
+            startU = 0;
+            startV = 0;
+            tilingX = textureProps.tilingX;
+            tilingY = textureProps.tilingY;
+            endU = w / tilingX;
+            endV = h / tilingY;
+        } else [startU, startV, endU, endV] = getUVsFromVariant(variant);
         if (facing === "right"){
             vertexArray = new Float32Array([
-                ...tl, 0,0,
-                ...tr, u,0,
-                ...br, u,v,
-                ...bl, 0,v,
+                ...tl, startU,startV,
+                ...tr, endU,startV,
+                ...br, endU,endV,
+                ...bl, startU,endV,
             ]);
         } else if (facing === "left"){
             vertexArray = new Float32Array([
-                ...tl, u,0,
-                ...tr, 0,0,
-                ...br, 0,v,
-                ...bl, u,v,
+                ...tl, endU,startV,
+                ...tr, startU,startV,
+                ...br, startU,endV,
+                ...bl, endU,endV,
             ]);
         }
 
@@ -219,12 +260,12 @@ export class Renderer {
         let texturedOffset = 0;
         let coloredOffset = 0;
         for (let i = 0; i < rects.length; i++) {
-            const { x, y, w, h, facing, color = [1, 1, 1, 1], texture } = rects[i];
+            const { x, y, w, h, facing, color = [1, 1, 1, 1], texture, variant } = rects[i];
             if (rects[i].texture){
-                this.staticTexturedVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, color, texture), texturedOffset);
+                this.staticTexturedVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, variant, color, texture), texturedOffset);
                 texturedOffset += texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex;
             } else {
-                this.staticColoredVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, color, texture), coloredOffset);
+                this.staticColoredVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, variant, color, texture), coloredOffset);
                 coloredOffset += coloredLayout.verts_per_quad * coloredLayout.floats_per_vertex;
             }
         }
@@ -261,8 +302,8 @@ export class Renderer {
 
         let offset = 0;
         for (let i = 0; i < rects.length; i++) {
-            const { x, y, w, h, facing, color = [1, 1, 1, 1], texture } = rects[i];
-            this.dynamicTexturedVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, color, texture), offset);
+            const { x, y, w, h, facing, color = [1, 1, 1, 1], texture, variant } = rects[i];
+            this.dynamicTexturedVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, variant, color, texture), offset);
             offset += texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex;
         }
     }
@@ -334,7 +375,7 @@ export class Renderer {
     private getBindGroupForTexture(texture: string): GPUBindGroup{
         switch (texture) {
             case "bricks":
-                return this.bindGroups[0];
+                return this.bindGroups[7];
             case "lava":
                 return this.bindGroups[1];
             case "door":
