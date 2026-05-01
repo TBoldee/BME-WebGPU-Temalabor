@@ -28,12 +28,12 @@ export function applyPhysics(level: Level, collisionResponseHandler: CollisionRe
 
 export function getCollisionsAndResolve(level: Level): void {
     const player = level.player;
-    let collidedRects = getCollidedRects(level.getRectsForCollision(), player);
+    let collidedRects = getCollidedRects(level.getRectsWithoutLavaForCollision(), player);
     const maximumRecursions = 6;
     let currentRecursions = 0;
     while (collidedRects.length !== 0 && currentRecursions++ < maximumRecursions) {
         resolveCollisions(collidedRects, player);
-        collidedRects = getCollidedRects(level.getRectsForCollision(), player);
+        collidedRects = getCollidedRects(level.getRectsWithoutLavaForCollision(), player);
     }
 }
 
@@ -128,7 +128,7 @@ function findRectWithSmallestMTV(rects: Rect[], player:Player): Rect {
 
 function isGrounded(player: Rect, level: Level): boolean{
     const groundCheckRect = new Rect(player.x, player.y + player.h, player.w, 1, "transparent")
-    for (const rect of level.getRectsForCollision()) {
+    for (const rect of level.getRectsWithoutLavaForCollision()) {
         if (checkCollision(rect, groundCheckRect)){
             return true;
         }
@@ -138,7 +138,7 @@ function isGrounded(player: Rect, level: Level): boolean{
 
 function isHittingCeiling(player: Rect, level: Level): boolean {
     const ceilingCheckRect = new Rect(player.x, player.y-1, player.w, 1, "transparent")
-    for (const rect of level.getRectsForCollision()) {
+    for (const rect of level.getRectsWithoutLavaForCollision()) {
         if (checkCollision(rect, ceilingCheckRect)){
             return true;
         }

@@ -109,6 +109,12 @@ export class Level {
         return rcts;
     }
 
+    getRectsWithoutLavaForCollision(): Rect[]{
+        let rects: Rect[] = [];
+        rects.push(...(this.rects.flat().filter(r => r.collision)));
+        return rects;
+    }
+
     private setTileVariants(): void {
         for (let row: number = 0; row < this.rects.length; row++ ) {
             for (let col: number = 0; col < this.rects[row].length; col++) {
