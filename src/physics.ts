@@ -5,7 +5,7 @@ import type {CollisionResponseHelper} from "./collisionResponse.ts";
 
 export function applyPhysics(level: Level, collisionResponseHandler: CollisionResponseHelper): void {
     const player = level.player;
-    let collidedSpikes: Rect[] = getCollidedRects([...level.spikes, ...level.enemies], player);
+    let collidedSpikes: Rect[] = getCollidedRects([...level.lava, ...level.enemies], player);
     collisionResponseHandler(collidedSpikes, player, level);
 
     if (!isGrounded(player, level) || player.isJumping) {
@@ -28,12 +28,12 @@ export function applyPhysics(level: Level, collisionResponseHandler: CollisionRe
 
 export function getCollisionsAndResolve(level: Level): void {
     const player = level.player;
-    let collidedRects = getCollidedRects(level.rects, player);
+    let collidedRects = getCollidedRects(level.rects.flat(), player);
     const maximumRecursions = 6;
     let currentRecursions = 0;
     while (collidedRects.length !== 0 && currentRecursions++ < maximumRecursions) {
         resolveCollisions(collidedRects, player);
-        collidedRects = getCollidedRects(level.rects, player);
+        collidedRects = getCollidedRects(level.rects.flat(), player);
     }
 }
 
@@ -128,7 +128,7 @@ function findRectWithSmallestMTV(rects: Rect[], player:Player): Rect {
 
 function isGrounded(player: Rect, level: Level): boolean{
     const groundCheckRect = new Rect(player.x, player.y + player.h, player.w, 1, "transparent")
-    for (const rect of level.rects) {
+    for (const rect of level.rects.flat()) {
         if (checkCollision(rect, groundCheckRect)){
             return true;
         }
@@ -138,7 +138,7 @@ function isGrounded(player: Rect, level: Level): boolean{
 
 function isHittingCeiling(player: Rect, level: Level): boolean {
     const ceilingCheckRect = new Rect(player.x, player.y-1, player.w, 1, "transparent")
-    for (const rect of level.rects) {
+    for (const rect of level.rects.flat()) {
         if (checkCollision(rect, ceilingCheckRect)){
             return true;
         }
