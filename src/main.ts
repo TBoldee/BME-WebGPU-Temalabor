@@ -7,12 +7,12 @@ import {responseFunction} from "./collisionResponse.ts";
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 const renderer = await Renderer.init(canvas);
 let currentLevel: Level = Level.getCurrentLevel();
+currentLevel.start();
 const timeStep = 1000 / 60;
 let lastTime = 0;
 let timeAccumulator = 0;
 
 async function frame(currentTime: number) {
-    currentLevel = Level.getCurrentLevel();
     if (lastTime === 0) {
         lastTime = currentTime;
     }
@@ -28,6 +28,7 @@ async function frame(currentTime: number) {
 
     lastTime = currentTime;
 
+    currentLevel = Level.getCurrentLevel();
     renderer.render(currentLevel).catch(console.error);
     requestAnimationFrame(frame);
 }

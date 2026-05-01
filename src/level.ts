@@ -15,6 +15,7 @@ export class Level {
     gravity: number;
     static hasWon: boolean = false;
     private static currentLevelIndex: number = 0;
+    static levelChanged: boolean = false;
 
     constructor(layoutString: string, enemies: Enemy[], backgroundColor: string, gravity: number = 2) {
         const w = 64;
@@ -68,6 +69,7 @@ export class Level {
     start() {
         this.player.moveTo(this.startX, this.startY);
         this.enemies.forEach(enemy => enemy.reset());
+        Level.levelChanged = true;
     }
 
     static restartGame(){
@@ -79,14 +81,19 @@ export class Level {
         levels[Level.currentLevelIndex].start();
     }
 
-    getRectsToRender(): Rect[] {
+    getStaticRectsToRender(): Rect[] {
         let rects: Rect[] = [];
         rects.push(this.background);
         rects.push(...this.rects.flat());
-        rects.push(this.player);
         rects.push(...this.lava);
-        rects.push(...this.enemies);
         rects.push(this.goal);
+        return rects;
+    }
+
+    getDynamicRectsToRender(): Rect[] {
+        let rects: Rect[] = [];
+        rects.push(this.player);
+        rects.push(...this.enemies);
         return rects;
     }
 

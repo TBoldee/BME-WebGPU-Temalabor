@@ -3,7 +3,7 @@ import fragWGSL from '../shaders/frag.wgsl?raw';
 import texturedFragWGSL from '../shaders/textured_quad_frag.wgsl?raw';
 import texturedQuadVertWGSL from '../shaders/textured_quad_vert.wgsl?raw';
 import { quitIfWebGPUNotAvailableOrMissingFeatures } from '../util/util.ts';
-import type { Level } from "./level.ts";
+import { Level } from "./level.ts";
 import type { Rect } from "./rect.ts";
 import bricksUrl from './images/purplebrick.png';
 import lavaUrl from './images/lava.png';
@@ -54,7 +54,7 @@ const coloredLayout = {
     ] satisfies GPUVertexAttribute[],
 }
 
-const BASE_INDICES = [0, 1, 2, 0, 2, 3];
+//const BASE_INDICES = [0, 1, 2, 0, 2, 3];
 
 function rectToVertices(
     x: number, y: number, w: number, h: number, facing: "left" | "right",
@@ -115,6 +115,13 @@ export class Renderer {
     private coloredPipeline: GPURenderPipeline;
     private canvas: HTMLCanvasElement;
     private bindGroups: GPUBindGroup[];
+    private staticTexturedVertexBuffer: GPUBuffer
+    private staticColoredVertexBuffer: GPUBuffer
+    private dynamicTexturedVertexBuffer: GPUBuffer
+    private indexBuffer: GPUBuffer
+    private staticTexturedVertexData: Float32Array
+    private staticColoredVertexData: Float32Array
+    private dynamicTexturedVertexData: Float32Array
 
     private constructor(
         device: GPUDevice,
@@ -123,6 +130,7 @@ export class Renderer {
         coloredPipeline: GPURenderPipeline,
         canvas: HTMLCanvasElement,
         bindGroups: GPUBindGroup[],
+        indexBuffer: GPUBuffer,
     ) {
         this.device = device;
         this.context = context;
@@ -130,6 +138,7 @@ export class Renderer {
         this.coloredPipeline = coloredPipeline;
         this.canvas = canvas;
         this.bindGroups = bindGroups;
+        this.indexBuffer = indexBuffer;
     }
 
     static async init(canvas: HTMLCanvasElement): Promise<Renderer> {
@@ -141,8 +150,15 @@ export class Renderer {
         const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
         context.configure({ device, format: presentationFormat });
 
-        const coloredPipeline = Renderer.createPipelineFromLayout(device, quadVertWGSL, fragWGSL, coloredLayout.bytes_per_vertex, coloredLayout.attributes);
-        const texturedPipeline = Renderer.createPipelineFromLayout(device, texturedQuadVertWGSL, texturedFragWGSL, texturedLayout.bytes_per_vertex, texturedLayout.attributes);
+        const coloredPipeline = Renderer.createPipelineFromLayout(device, quadVertWGSL, fragWGSL, coloredLayout.bytes_per_vertex, coloredLayout.attributes, "coloredPipeline");
+        const texturedPipeline = Renderer.createPipelineFromLayout(device, texturedQuadVertWGSL, texturedFragWGSL, texturedLayout.bytes_per_vertex, texturedLayout.attributes, "texturedPipeline");
+
+        const indexData = new Uint16Array([0,1,2,0,2,3]);
+        const indexBuffer = device.createBuffer({
+            size:  indexData.byteLength,
+            usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+        });
+        device.queue.writeBuffer(indexBuffer, 0, indexData);
 
         const sampler = device.createSampler({
             addressModeU: 'repeat',
@@ -180,69 +196,88 @@ export class Renderer {
             );
         }
 
-        const renderer = new Renderer(device, context, texturedPipeline, coloredPipeline, canvas, bindGroups);
+        const renderer = new Renderer(device, context, texturedPipeline, coloredPipeline, canvas, bindGroups, indexBuffer);
         renderer.resizeCanvas(canvas);
         new ResizeObserver(() => renderer.resizeCanvas(canvas)).observe(canvas);
         return renderer;
     }
 
     private resizeCanvas(canvas: HTMLCanvasElement): void {
-        //const dpr     = window.devicePixelRatio;
-        canvas.width  = canvas.clientWidth  //* dpr;
-        canvas.height = canvas.clientHeight //* dpr;
+        canvas.width  = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
     }
 
-    async render(level: Level): Promise<void> {
-        let rects: Rect[] = level.getRectsToRender();
+    rebuildStaticBuffers(rects: Rect[]) {
         const sw = this.canvas.width;
         const sh = this.canvas.height;
         let texturedRects: Rect[] = rects.filter(r => r.texture);
         let coloredRects: Rect[] = rects.filter(r => !r.texture);
 
-        const texturedVertexData = new Float32Array(texturedRects.length * texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex);
-        const coloredVertexData = new Float32Array(coloredRects.length * coloredLayout.verts_per_quad * coloredLayout.floats_per_vertex);
-        const indexData  = new Uint16Array(rects.length * texturedLayout.indices_per_quad);
+        this.staticTexturedVertexData = new Float32Array(texturedRects.length * texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex);
+        this.staticColoredVertexData = new Float32Array(coloredRects.length * coloredLayout.verts_per_quad * coloredLayout.floats_per_vertex);
 
         let texturedOffset = 0;
         let coloredOffset = 0;
         for (let i = 0; i < rects.length; i++) {
             const { x, y, w, h, facing, color = [1, 1, 1, 1], texture } = rects[i];
             if (rects[i].texture){
-                texturedVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, color, texture), texturedOffset);
+                this.staticTexturedVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, color, texture), texturedOffset);
                 texturedOffset += texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex;
             } else {
-                coloredVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, color, texture), coloredOffset);
+                this.staticColoredVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, color, texture), coloredOffset);
                 coloredOffset += coloredLayout.verts_per_quad * coloredLayout.floats_per_vertex;
             }
-            const base = i * texturedLayout.verts_per_quad;
-            for (let j = 0; j < texturedLayout.indices_per_quad; j++) {
-                indexData[i * texturedLayout.indices_per_quad + j] = BASE_INDICES[j] + base;
-            }
         }
 
-        let coloredVertexBuffer: GPUBuffer;
-        if (coloredVertexData.length > 0) {
-            coloredVertexBuffer = this.device.createBuffer({
-                size:  coloredVertexData.byteLength,
-                usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-            });
-            this.device.queue.writeBuffer(coloredVertexBuffer, 0, coloredVertexData);
-        }
+        this.staticColoredVertexBuffer = this.rebuildBuffer(this.staticColoredVertexData, "staticColoredVertexBuffer");
+        this.staticTexturedVertexBuffer = this.rebuildBuffer(this.staticTexturedVertexData, "staticTexturedVertexBuffer");
+    }
 
-        let texturedVertexBuffer: GPUBuffer;
-        if (texturedVertexData.length > 0) {
-            texturedVertexBuffer = this.device.createBuffer({
-                size:  texturedVertexData.byteLength,
-                usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-            });
-            this.device.queue.writeBuffer(texturedVertexBuffer, 0, texturedVertexData);
-        }
+    rebuildDynamicTexturedBuffers(rects: Rect[]) {
+        this.calculateDynamicTexturedData(rects);
+        this.dynamicTexturedVertexBuffer = this.rebuildBuffer(this.dynamicTexturedVertexData, "dynamicTexturedVertexBuffer");
+    }
 
-        const indexBuffer = this.device.createBuffer({
-            size:  indexData.byteLength,
-            usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+    rebuildBuffer(vertexData: Float32Array, label: string): GPUBuffer {
+        let vertexBuffer: GPUBuffer;
+        vertexBuffer = this.device.createBuffer({
+            label: label,
+            size:  vertexData.byteLength,
+            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         });
-        this.device.queue.writeBuffer(indexBuffer, 0, indexData);
+        this.writeBuffer(vertexBuffer, vertexData as Float32Array<ArrayBuffer> );
+        return vertexBuffer;
+    }
+
+    writeBuffer(buffer: GPUBuffer, data: Float32Array): void {
+        this.device.queue.writeBuffer(buffer, 0, data as Float32Array<ArrayBuffer>);
+    }
+
+    calculateDynamicTexturedData(rects: Rect[]) {
+        const sw = this.canvas.width;
+        const sh = this.canvas.height;
+
+        this.dynamicTexturedVertexData = new Float32Array(rects.length * texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex);
+
+        let offset = 0;
+        for (let i = 0; i < rects.length; i++) {
+            const { x, y, w, h, facing, color = [1, 1, 1, 1], texture } = rects[i];
+            this.dynamicTexturedVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, color, texture), offset);
+            offset += texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex;
+        }
+    }
+
+    async render(level: Level): Promise<void> {
+        let staticRects: Rect[] = level.getStaticRectsToRender();
+        let dynamicRects: Rect[] = level.getDynamicRectsToRender();
+
+        if(Level.levelChanged){
+            this.rebuildStaticBuffers(staticRects);
+            this.rebuildDynamicTexturedBuffers(dynamicRects);
+            Level.levelChanged = false;
+        }
+        this.calculateDynamicTexturedData(dynamicRects);
+        this.writeBuffer(this.dynamicTexturedVertexBuffer,this.dynamicTexturedVertexData);
 
         const commandEncoder = this.device.createCommandEncoder();
         const passEncoder = commandEncoder.beginRenderPass({
@@ -253,32 +288,41 @@ export class Renderer {
                 storeOp:    'store',
             }],
         });
+        passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
 
-        texturedOffset = 0;
-        coloredOffset = 0;
-        for (let i = 0; i < rects.length; i++) {
-            const rect: Rect = rects[i];
+        let staticTexturedOffset = 0;
+        let staticColoredOffset = 0;
+        for (let i = 0; i < staticRects.length; i++) {
+            const rect: Rect = staticRects[i];
             if (rect.texture) {
                 passEncoder.setPipeline(this.texturedPipeline);
                 passEncoder.setBindGroup(0, this.getBindGroupForTexture(rect.texture!));
-                passEncoder.setVertexBuffer(0, texturedVertexBuffer, texturedOffset);
-                texturedOffset += texturedLayout.verts_per_quad * texturedLayout.bytes_per_vertex;
+                passEncoder.setVertexBuffer(0, this.staticTexturedVertexBuffer, staticTexturedOffset);
+                staticTexturedOffset += texturedLayout.verts_per_quad * texturedLayout.bytes_per_vertex;
             } else {
                 passEncoder.setPipeline(this.coloredPipeline);
-                passEncoder.setVertexBuffer(0, coloredVertexBuffer, coloredOffset);
-                coloredOffset += coloredLayout.verts_per_quad * coloredLayout.bytes_per_vertex;
+                passEncoder.setVertexBuffer(0, this.staticColoredVertexBuffer, staticColoredOffset);
+                staticColoredOffset += coloredLayout.verts_per_quad * coloredLayout.bytes_per_vertex;
             }
-            passEncoder.setIndexBuffer(indexBuffer, 'uint16');
+            passEncoder.drawIndexed(6);
+        }
+
+        passEncoder.setPipeline(this.texturedPipeline);
+        let dynamicTexturedOffset = 0;
+        for (let i = 0; i < dynamicRects.length; i++) {
+            const rect: Rect = dynamicRects[i];
+
+            passEncoder.setBindGroup(0, this.getBindGroupForTexture(rect.texture!));
+            passEncoder.setVertexBuffer(0, this.dynamicTexturedVertexBuffer, dynamicTexturedOffset);
+            dynamicTexturedOffset += texturedLayout.verts_per_quad * texturedLayout.bytes_per_vertex;
+
+            passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
             passEncoder.drawIndexed(6);
         }
 
         passEncoder.end();
 
         this.device.queue.submit([commandEncoder.finish()]);
-
-        texturedVertexBuffer?.destroy();
-        coloredVertexBuffer?.destroy();
-        indexBuffer.destroy();
     }
 
     static async loadImageBitmap(url: string) {
@@ -306,10 +350,11 @@ export class Renderer {
         }
     }
 
-    private static createPipelineFromLayout (device: GPUDevice, vertShader: string, fragmentShader: string, vertexBufferStride: number, attributes: Iterable<GPUVertexAttribute>)
+    private static createPipelineFromLayout (device: GPUDevice, vertShader: string, fragmentShader: string, vertexBufferStride: number, attributes: Iterable<GPUVertexAttribute>, label: string)
     :GPURenderPipeline {
         const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
         return device.createRenderPipeline({
+            label: label,
             layout: 'auto',
             vertex: {
                 module: device.createShaderModule({ code: vertShader }),
