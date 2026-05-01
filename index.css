@@ -9,8 +9,8 @@ html, body {
     background-color: #787878;
 }
 canvas {
-    width: 900px;
-    height: 900px;
+    width: 896px;
+    height: 896px;
     border: 3px solid black;
 }
 

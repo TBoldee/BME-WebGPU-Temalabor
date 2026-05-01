@@ -36,7 +36,7 @@ window.addEventListener('keydown', (event) => {
             break;
         case 'c':
         case 'C':
-            currentLevel.player.lieDownIfPossible(currentLevel.rects);
+            currentLevel.player.lieDownIfPossible(currentLevel.rects.flat());
             break;
         case 'r':
             if (Level.hasWon){
