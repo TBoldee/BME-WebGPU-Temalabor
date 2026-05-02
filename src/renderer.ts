@@ -13,6 +13,7 @@ import ghostLyingUrl from './images/ghostLying.png';
 import bonesUrl from './images/bone.png';
 import demonUrl from './images/demonhead.png'
 import bricksAtlasUrl from './images/purplebrickatlas.png'
+import cageUrl from './images/cage.png';
 
 type textureProps = {
     url: string;
@@ -29,6 +30,7 @@ const textureURLs:textureProps[] = [
     {url: bonesUrl, name: "bones", tilingX: 64, tilingY: 64},
     {url: demonUrl, name: "demon", tilingX: 64, tilingY: 64},
     {url: bricksAtlasUrl, name: "bricksAtlas", tilingX: 64, tilingY: 64},
+    {url: cageUrl, name: "cage", tilingX: 64, tilingY: 64},
 ];
 
 
@@ -317,8 +319,7 @@ export class Renderer {
             this.rebuildDynamicTexturedBuffers(dynamicRects);
             Level.levelChanged = false;
         }
-        this.calculateDynamicTexturedData(dynamicRects);
-        this.writeBuffer(this.dynamicTexturedVertexBuffer,this.dynamicTexturedVertexData);
+        this.rebuildDynamicTexturedBuffers(dynamicRects);
 
         const commandEncoder = this.device.createCommandEncoder();
         const passEncoder = commandEncoder.beginRenderPass({
@@ -388,6 +389,8 @@ export class Renderer {
                 return this.bindGroups[5];
             case "demon":
                 return this.bindGroups[6];
+            case "cage":
+                return this.bindGroups[8];
         }
     }
 

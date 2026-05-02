@@ -42,6 +42,8 @@ export class Level {
                 this.rects[row].push(new Rect(x, y, w, h, "red", "bricks"));
             } else if (str === "S"){
                 this.rects[row].push(new Rect(x, y, w, h, "brown", "bones"));
+            } else if (str === "X"){
+                this.rects[row].push(new Rect(x, y, w, h, "blue", "cage"));
             } else if (str === "L"){
                 this.rects[row].push(new Rect(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
                 this.lava.push(new Lava(x, y, w, h));
@@ -103,6 +105,7 @@ export class Level {
         let rects: Rect[] = [];
         rects.push(this.player);
         rects.push(...this.enemies);
+        rects.push(...this.getProjectiles())
         return rects;
     }
 
@@ -117,6 +120,20 @@ export class Level {
         let rects: Rect[] = [];
         rects.push(...(this.rects.flat().filter(r => r.collision)));
         return rects;
+    }
+
+    getProjectiles(): Rect [] {
+        let projectiles: Rect[] = [];
+        for (const enemy of this.enemies) {
+            projectiles.push(...enemy.bullets)
+        }
+        return projectiles;
+    }
+
+    getHazards(): Rect[]{
+        let hazards: Rect[] = [];
+        hazards.push(...this.lava, ...this.enemies, ...this.getProjectiles());
+        return hazards;
     }
 
     private setTileVariants(): void {
@@ -149,7 +166,7 @@ const levelOne: Level = new Level (
     B____________B
     B__________#_B
     B________BBBBB
-    B_+__BBBBBBBBB
+    BX+__BBBBBBBBB
     BBBBBBBBBBBBBB
     BBBBBBBBBBBBBB
     BBBBBBBBBBBBBB
@@ -183,10 +200,10 @@ const levelThree: Level = new Level (
     `
     BBBBBBBBBBBBBB
     BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
+    BBBBBBXXBBBBBB
+    BBBBXXXXXXBBBB
+    BXXXXXXXXXXXXB
+    BXXXXXXXXXXXXB
     B+__________#B
     BB__SS__SS__BB
     B____________B
@@ -218,7 +235,7 @@ const levelFour: Level = new Level (
     BBBBBBBBBBBBBB
     `,
     [
-        new Enemy({x: 1, y: 9, endX: 12, endY: 9, patrolDuration: 90})
+        new Enemy({x: 1, y: 9, endX: 12, endY: 9, patrolDuration: 90, shootingDirection: "left", shootingInterval: 1000})
     ],
     "indigo"
 );

@@ -1,4 +1,5 @@
 import {Rect} from "./rect.ts";
+import {Lava} from "./lava.ts";
 
 export class Enemy extends Rect {
     startX: number;
@@ -9,8 +10,12 @@ export class Enemy extends Rect {
     verticalSpeed: number;
     patrolDuration: number;
     direction: "forward" | "backward";
-    intervalId: number
-    constructor({x, y, endX, endY, w = 1, h = 1, patrolDuration = 1}: {x: number, y: number, endX: number, endY: number, w?: number, h?: number, patrolDuration?: number}) {
+    private intervalId: number;
+    bullets: Rect[];
+    shootingDirection: "none" | "left" | "right";
+    shootingInterval: number;
+    constructor({x, y, endX, endY, w = 1, h = 1, patrolDuration = 1, shootingDirection = "none", shootingInterval = 1000}:
+                {x: number, y: number, endX: number, endY: number, w?: number, h?: number, patrolDuration?: number, shootingDirection?: "none" | "left" | "right", shootingInterval?: number}) {
         super(x * 64, y * 64, w * 64, h * 64, "red", "demon");
         this.startX = x * 64;
         this.startY = y * 64;
@@ -20,6 +25,9 @@ export class Enemy extends Rect {
         this.horizontalSpeed = (endX - x) / patrolDuration;
         this.verticalSpeed = (endY - y) / patrolDuration;
         this.direction = "forward";
+        this.bullets = [];
+        this.shootingDirection = shootingDirection;
+        this.shootingInterval = shootingInterval;
     }
 
     moveAlongPath(){
@@ -47,10 +55,25 @@ export class Enemy extends Rect {
         this.verticalSpeed = (this.endY - this.startY) / this.patrolDuration;
         this.moveTo(this.startX, this.startY);
         this.clearTimer()
-        this.intervalId = setInterval(() => {console.log(this.intervalId)},1000);
+        if (this.shootingDirection !== "none") this.intervalId = setInterval(() => {this.shoot()},this.shootingInterval);
+        this.bullets = [];
     }
 
     clearTimer(){
         if (this.intervalId) clearInterval(this.intervalId);
+    }
+
+    shoot(){
+        const projectileW = 32;
+        const projectileH = 32;
+        let projectileX, projectileY;
+        if (this.shootingDirection === "left"){
+            projectileX = this.x - projectileW;
+            projectileY = this.y + (this.h - projectileH)/2;
+        } else {
+            projectileX = this.x + this.w;
+            projectileY = this.y + (this.h - projectileH)/2;
+        }
+        this.bullets.push(new Lava(projectileX, projectileY, projectileW, projectileH));
     }
 }

@@ -5,7 +5,7 @@ import type {CollisionResponseHelper} from "./collisionResponse.ts";
 
 export function applyPhysics(level: Level, collisionResponseHandler: CollisionResponseHelper): void {
     const player = level.player;
-    let collidedSpikes: Rect[] = getCollidedRects([...level.lava, ...level.enemies], player);
+    let collidedSpikes: Rect[] = getCollidedRects(level.getHazards(), player);
     collisionResponseHandler(collidedSpikes, player, level);
 
     if (!isGrounded(player, level) || player.isJumping) {
