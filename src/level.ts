@@ -14,7 +14,7 @@ export class Level {
     startY: number;
     gravity: number;
     static hasWon: boolean = false;
-    private static currentLevelIndex: number = 0;
+     static currentLevelIndex: number = 0;
     static levelChanged: boolean = false;
 
     constructor(layoutString: string, enemies: Enemy[], backgroundColor: string, gravity: number = 2) {
@@ -66,6 +66,7 @@ export class Level {
     }
 
     finish(){
+        this.enemies.forEach(enemy => enemy.clearTimer());
         if (levels.length > Level.currentLevelIndex + 1) {
             levels[++Level.currentLevelIndex].start();
         } else Level.hasWon = true;
@@ -78,11 +79,14 @@ export class Level {
     }
 
     static restartGame(){
-        this.hasWon = false;
-        this.currentLevelIndex = 0;
+        console.log("Restarting game...");
+        Level.currentLevelIndex = 0;
         for (const level of levels) {
             level.player.kill();
+            level.start();
+            level.enemies.forEach(enemy => enemy.clearTimer());
         }
+        this.hasWon = false;
         levels[Level.currentLevelIndex].start();
     }
 
@@ -196,12 +200,27 @@ const levelThree: Level = new Level (
     "indigo"
 );
 
-/*const levelFour: Level = new Level (
-    `+`,
+const levelFour: Level = new Level (
+    `
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    B+__________#B
+    BB__SS__SS__BB
+    B____________B
+    B____________B
+    B____________B
+    BLLLLLLLLLLLLB
+    BSSSSSSSSSSSSB
+    BBBBBBBBBBBBBB
+    `,
     [
-        new Enemy(418, 400, 418, 660, 64, 64, 42)
+        new Enemy({x: 1, y: 9, endX: 12, endY: 9, patrolDuration: 90})
     ],
     "indigo"
-);*/
+);
 
-levels.push(levelOne, levelTwo, levelThree);
+levels.push(levelOne, levelTwo, levelThree, levelFour);

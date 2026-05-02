@@ -7,17 +7,18 @@ export class Enemy extends Rect {
     endY: number;
     horizontalSpeed: number;
     verticalSpeed: number;
-    speed: number;
+    patrolDuration: number;
     direction: "forward" | "backward";
-    constructor(x: number, y: number, endX: number, endY: number, w: number, h: number, speed: number = 35) {
-        super(x, y, w, h, "red", "demon");
-        this.startX = x;
-        this.startY = y;
-        this.endX = endX;
-        this.endY = endY;
-        this.speed = speed === 0 ? 1 : speed;
-        this.horizontalSpeed = (endX - x) / speed;
-        this.verticalSpeed = (endY - y) / speed;
+    intervalId: number
+    constructor({x, y, endX, endY, w = 1, h = 1, patrolDuration = 1}: {x: number, y: number, endX: number, endY: number, w?: number, h?: number, patrolDuration?: number}) {
+        super(x * 64, y * 64, w * 64, h * 64, "red", "demon");
+        this.startX = x * 64;
+        this.startY = y * 64;
+        this.endX = endX * 64;
+        this.endY = endY * 64;
+        this.patrolDuration = patrolDuration === 0 ? 1 : patrolDuration;
+        this.horizontalSpeed = (endX - x) / patrolDuration;
+        this.verticalSpeed = (endY - y) / patrolDuration;
         this.direction = "forward";
     }
 
@@ -42,8 +43,14 @@ export class Enemy extends Rect {
 
     reset(){
         this.direction = "forward";
-        this.horizontalSpeed = (this.endX - this.startX) / this.speed;
-        this.verticalSpeed = (this.endY - this.startY) / this.speed;
+        this.horizontalSpeed = (this.endX - this.startX) / this.patrolDuration;
+        this.verticalSpeed = (this.endY - this.startY) / this.patrolDuration;
         this.moveTo(this.startX, this.startY);
+        this.clearTimer()
+        this.intervalId = setInterval(() => {console.log(this.intervalId)},1000);
+    }
+
+    clearTimer(){
+        if (this.intervalId) clearInterval(this.intervalId);
     }
 }
