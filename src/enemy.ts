@@ -1,5 +1,5 @@
 import {Rect} from "./rect.ts";
-import {Lava} from "./lava.ts";
+import {Projectile} from "./projectile.ts";
 
 export class Enemy extends Rect {
     startX: number;
@@ -11,11 +11,11 @@ export class Enemy extends Rect {
     patrolDuration: number;
     direction: "forward" | "backward";
     private intervalId: number;
-    bullets: Rect[];
-    shootingDirection: "none" | "left" | "right";
+    bullets: Projectile[];
+    shootingDirection: "none" | "left" | "right" | "up" | "down";
     shootingInterval: number;
     constructor({x, y, endX, endY, w = 1, h = 1, patrolDuration = 1, shootingDirection = "none", shootingInterval = 1000}:
-                {x: number, y: number, endX: number, endY: number, w?: number, h?: number, patrolDuration?: number, shootingDirection?: "none" | "left" | "right", shootingInterval?: number}) {
+                {x: number, y: number, endX: number, endY: number, w?: number, h?: number, patrolDuration?: number, shootingDirection?: "none" | "left" | "right" | "up" | "down", shootingInterval?: number}) {
         super(x * 64, y * 64, w * 64, h * 64, "red", "demon");
         this.startX = x * 64;
         this.startY = y * 64;
@@ -67,13 +67,25 @@ export class Enemy extends Rect {
         const projectileW = 32;
         const projectileH = 32;
         let projectileX, projectileY;
+        let hSpeed = 0;
+        let vSpeed = 0;
         if (this.shootingDirection === "left"){
             projectileX = this.x - projectileW;
             projectileY = this.y + (this.h - projectileH)/2;
-        } else {
+            hSpeed = -5;
+        } else if (this.shootingDirection === "right") {
             projectileX = this.x + this.w;
             projectileY = this.y + (this.h - projectileH)/2;
+            hSpeed = 5;
+        } else if (this.shootingDirection === "up"){
+            projectileX = this.x + (this.w - projectileW)/2;
+            projectileY = this.y - projectileH;
+            vSpeed = -5;
+        } else if (this.shootingDirection === "down"){
+            projectileX = this.x + (this.w - projectileW)/2;
+            projectileY = this.y + this.h;
+            vSpeed = 5;
         }
-        this.bullets.push(new Lava(projectileX, projectileY, projectileW, projectileH));
+        this.bullets.push(new Projectile(projectileX, projectileY, projectileW, projectileH, hSpeed, vSpeed));
     }
 }

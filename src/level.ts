@@ -166,9 +166,9 @@ const levelOne: Level = new Level (
     B____________B
     B__________#_B
     B________BBBBB
-    BX+__BBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
+    BX+__BBBBBBSSB
+    BBBBBBBSSBBBBB
+    BSSSBBBBSSBBBB
     BBBBBBBBBBBBBB
     `,
     [],
@@ -200,9 +200,9 @@ const levelThree: Level = new Level (
     `
     BBBBBBBBBBBBBB
     BBBBBBBBBBBBBB
-    BBBBBBXXBBBBBB
-    BBBBXXXXXXBBBB
-    BXXXXXXXXXXXXB
+    BBBBBB__BBBBBB
+    BBBB______BBBB
+    B____________B
     BXXXXXXXXXXXXB
     B+__________#B
     BB__SS__SS__BB
@@ -221,21 +221,21 @@ const levelFour: Level = new Level (
     `
     BBBBBBBBBBBBBB
     BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
+    B____________B
+    B____________B
+    BX___X__X___XB
+    B____________B
     B+__________#B
-    BB__SS__SS__BB
-    B____________B
-    B____________B
-    B____________B
-    BLLLLLLLLLLLLB
-    BSSSSSSSSSSSSB
+    BSSBBSSSSBSSSB
+    BSSSSSSSBBSSSB
+    BSSBBBSSSSSSSB
+    BSBBBBSSBBBSSB
+    BSSBBSSSBBBBSB
+    BBBBBSSBBBSSSB
     BBBBBBBBBBBBBB
     `,
     [
-        new Enemy({x: 1, y: 9, endX: 12, endY: 9, patrolDuration: 90, shootingDirection: "left", shootingInterval: 1000})
+        new Enemy({x: 1, y: 2, endX: 12, endY: 2, patrolDuration: 90, shootingDirection: "down", shootingInterval: 150})
     ],
     "indigo"
 );

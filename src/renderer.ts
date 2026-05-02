@@ -14,6 +14,7 @@ import bonesUrl from './images/bone.png';
 import demonUrl from './images/demonhead.png'
 import bricksAtlasUrl from './images/purplebrickatlas.png'
 import cageUrl from './images/cage.png';
+import energyballUrl from './images/energyball.png';
 
 type textureProps = {
     url: string;
@@ -31,6 +32,7 @@ const textureURLs:textureProps[] = [
     {url: demonUrl, name: "demon", tilingX: 64, tilingY: 64},
     {url: bricksAtlasUrl, name: "bricksAtlas", tilingX: 64, tilingY: 64},
     {url: cageUrl, name: "cage", tilingX: 64, tilingY: 64},
+    {url: energyballUrl, name: "ball", tilingX: 32, tilingY: 32},
 ];
 
 
@@ -391,6 +393,8 @@ export class Renderer {
                 return this.bindGroups[6];
             case "cage":
                 return this.bindGroups[8];
+            case "ball":
+                return this.bindGroups[9];
         }
     }
 

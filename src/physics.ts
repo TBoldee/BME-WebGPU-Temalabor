@@ -19,6 +19,10 @@ export function applyPhysics(level: Level, collisionResponseHandler: CollisionRe
     }
     for (const enemy of level.enemies) {
         enemy.moveAlongPath();
+        for (const bullet of enemy.bullets) {
+            bullet.applySpeed();
+            if (getCollidedRects(level.getRectsForCollision(), bullet).length) enemy.bullets = enemy.bullets.filter(b => b !== bullet);
+        }
     }
     sweptAABB(player, level.getRectsForCollision());
 
@@ -37,7 +41,7 @@ export function getCollisionsAndResolve(level: Level): void {
     }
 }
 
-export function getCollidedRects(rects: Rect[], player: Player): Rect[]{
+export function getCollidedRects(rects: Rect[], player: Rect): Rect[]{
     const collidedRects: Rect[] = [];
     for (const rect of rects) {
         if (checkCollision(rect, player)){
