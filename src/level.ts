@@ -2,11 +2,13 @@ import {Player} from "./player.ts";
 import {Rect} from "./rect.ts";
 import {Lava} from "./lava.ts";
 import {Enemy} from "./enemy.ts"
+import {ChasingEnemy} from "./images/chasingEnemy.ts";
 
 export class Level {
     rects: Rect[][];
     lava: Lava[];
     enemies: Enemy[];
+    chasers: ChasingEnemy[];
     goal: Rect;
     player: Player;
     background: Rect;
@@ -14,15 +16,15 @@ export class Level {
     startY: number;
     gravity: number;
     static hasWon: boolean = false;
-     static currentLevelIndex: number = 0;
+    static currentLevelIndex: number = 0;
     static levelChanged: boolean = false;
 
-    constructor(layoutString: string, enemies: Enemy[], backgroundColor: string, gravity: number = 2) {
+    constructor(layoutString: string, enemies: Enemy[], chasers: ChasingEnemy[], backgroundColor: string, gravity: number = 2) {
         const w = 64;
         const h = 64;
         const doorW = 32;
         const doorH = 64;
-        const playerW = 32;
+        const playerW = 24;
         const playerH = 64;
         this.rects = [];
         for (let i = 0; i < 14; i++) {this.rects.push([]);}
@@ -59,6 +61,11 @@ export class Level {
         }
         this.setTileVariants();
         this.enemies = enemies;
+        this.chasers = chasers;
+        for (const chaser of chasers) {
+            chaser.setTiles(this.rects);
+            chaser.setPlayer(this.player);
+        }
         this.background = new Rect(0,0,900,900,backgroundColor);
         this.gravity = gravity;
     }
@@ -77,6 +84,7 @@ export class Level {
     start() {
         this.player.moveTo(this.startX, this.startY);
         this.enemies.forEach(enemy => enemy.reset());
+        this.chasers.forEach(chaser => chaser.reset());
         Level.levelChanged = true;
     }
 
@@ -105,6 +113,7 @@ export class Level {
         let rects: Rect[] = [];
         rects.push(this.player);
         rects.push(...this.enemies);
+        rects.push(...this.chasers);
         rects.push(...this.getProjectiles())
         return rects;
     }
@@ -132,7 +141,7 @@ export class Level {
 
     getHazards(): Rect[]{
         let hazards: Rect[] = [];
-        hazards.push(...this.lava, ...this.enemies, ...this.getProjectiles());
+        hazards.push(...this.lava, ...this.enemies, ...this.getProjectiles(), ...this.chasers);
         return hazards;
     }
 
@@ -172,6 +181,7 @@ const levelOne: Level = new Level (
     BBBBBBBBBBBBBB
     `,
     [],
+    [],
     "indigo"
 );
 
@@ -193,6 +203,7 @@ const levelTwo: Level = new Level (
     BBBBBBBBBBBBBB
     `,
     [],
+    [],
     "indigo"
 );
 
@@ -213,6 +224,7 @@ const levelThree: Level = new Level (
     BSSSSSSSSSSSSB
     BBBBBBBBBBBBBB
     `,
+    [],
     [],
     "indigo"
 );
@@ -237,7 +249,32 @@ const levelFour: Level = new Level (
     [
         new Enemy({x: 1, y: 2, endX: 12, endY: 2, patrolDuration: 90, shootingDirection: "down", shootingInterval: 150})
     ],
+    [],
     "indigo"
 );
 
-levels.push(levelOne, levelTwo, levelThree, levelFour);
+const levelFive: Level = new Level (
+    `
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    B____________B
+    B____________B
+    B____________B
+    B__________#_B
+    B________BBBBB
+    BX+__BBBBBBSSB
+    BBBBBBBSSBBBBB
+    BSSSBBBBSSBBBB
+    BBBBBBBBBBBBBB
+    `,
+    [],
+    [
+        new ChasingEnemy(1,5)
+    ],
+    "indigo"
+);
+
+levels.push(levelOne, levelTwo, levelThree, levelFour, levelFive);

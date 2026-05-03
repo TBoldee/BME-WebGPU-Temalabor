@@ -102,4 +102,5 @@ export class Player extends Rect {
         this.verticalSpeed = 0;
         this.facing = "right";
     }
+
 }

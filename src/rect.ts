@@ -31,4 +31,10 @@ export class Rect {
         this.x = Math.floor(this.x + x);
         this.y = Math.floor(this.y + y);
     }
+
+    getTilePosition(): [number, number] {
+        const centerX = this.x + this.w/2;
+        const centerY = this.y + this.h/2;
+        return [Math.floor(centerX / 64), Math.floor(centerY / 64)];
+    }
 }

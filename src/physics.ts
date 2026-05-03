@@ -24,6 +24,10 @@ export function applyPhysics(level: Level, collisionResponseHandler: CollisionRe
             if (getCollidedRects(level.getRectsForCollision(), bullet).length) enemy.bullets = enemy.bullets.filter(b => b !== bullet);
         }
     }
+    for (const chaser of level.chasers) {
+        chaser.move();
+    }
+
     sweptAABB(player, level.getRectsForCollision());
 
     getCollisionsAndResolve(level);
