@@ -258,23 +258,41 @@ const levelFive: Level = new Level (
     BBBBBBBBBBBBBB
     BBBBBBBBBBBBBB
     BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
     B____________B
+    BBBBBBBBBBBB_B
     B____________B
-    B____________B
-    B__________#_B
-    B________BBBBB
-    BX+__BBBBBBSSB
-    BBBBBBBSSBBBBB
-    BSSSBBBBSSBBBB
-    BBBBBBBBBBBBBB
+    B_BBBBBBBBBBBB
+    B_B________BBB
+    B_B__________B
+    B+B____BLBBB_B
+    B___B___B____B
+    B__BB___B_BBBB
+    B_BBB___B___#B
+    BBBBBLLLBBBBBB
     `,
     [],
     [
-        new ChasingEnemy(1,5)
+        new ChasingEnemy(1,3)
     ],
     "indigo"
 );
 
 levels.push(levelOne, levelTwo, levelThree, levelFour, levelFive);
+
+
+const fullstring = `
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+    BBBBBBBBBBBBBB
+`;

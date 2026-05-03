@@ -32,6 +32,7 @@ export class ChasingEnemy extends Rect {
         let path;
         if (!this.currentGoal) {
             path = this.aStar();
+            if (path.length === 0) return;
             this.currentGoal = [path[0][1], path[0][0]];
         }
         if (this.horizontalSpeed === 0 && this.verticalSpeed === 0) this.setSpeedForGoal();
