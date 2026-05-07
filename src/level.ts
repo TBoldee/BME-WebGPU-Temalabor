@@ -44,8 +44,10 @@ export class Level {
                 this.rects[row].push(new Rect(x, y, w, h, "red", "bricks"));
             } else if (str === "S"){
                 this.rects[row].push(new Rect(x, y, w, h, "brown", "bones"));
-            } else if (str === "X"){
+            } else if (str === "X") {
                 this.rects[row].push(new Rect(x, y, w, h, "blue", "cage"));
+            } else if (str === "G") {
+                this.rects[row].push(new Rect(x, y, w, h, "green", "grass"));
             } else if (str === "L"){
                 this.rects[row].push(new Rect(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
                 this.lava.push(new Lava(x, y, w, h));
@@ -149,7 +151,7 @@ export class Level {
         for (let row: number = 0; row < this.rects.length; row++ ) {
             for (let col: number = 0; col < this.rects[row].length; col++) {
                 let currentTile = this.rects[row][col];
-                if (currentTile.texture !== "bricks") continue;
+                if (!currentTile.texture?.match(/bricks|grass/)) continue;
                 let bitmask: number = 0;
                 if (row > 0) if (this.rects[row-1][col].texture === currentTile.texture) bitmask |= 1;
                 if (col > 0) if (this.rects[row][col-1].texture === currentTile.texture) bitmask |= 2;
@@ -277,7 +279,29 @@ const levelFive: Level = new Level (
     "indigo"
 );
 
-levels.push(levelOne, levelTwo, levelThree, levelFour, levelFive);
+const levelSix: Level = new Level (
+    `
+    ______________
+    ______________
+    ______________
+    _#____________
+    _G____________
+    ____GG________
+    ____GGG_______
+    ________GG____
+    G__________GGG
+    G______GGG__GG
+    G+__GG_______G
+    GGGGGGGGGGGGGG
+    GGGGGGGGGGGGGG
+    ______________
+    `,
+    [],
+    [],
+    "skyblue"
+);
+
+levels.push(levelOne, levelTwo, levelThree, levelFour, levelFive, levelSix);
 
 
 const fullstring = `

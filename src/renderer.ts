@@ -15,6 +15,7 @@ import demonUrl from './images/demonhead.png'
 import bricksAtlasUrl from './images/purplebrickatlas.png'
 import cageUrl from './images/cage.png';
 import energyballUrl from './images/energyball.png';
+import grassAtlasUrl from './images/grassatlas.png'
 
 type textureProps = {
     url: string;
@@ -33,6 +34,7 @@ const textureURLs:textureProps[] = [
     {url: bricksAtlasUrl, name: "bricksAtlas", tilingX: 64, tilingY: 64},
     {url: cageUrl, name: "cage", tilingX: 64, tilingY: 64},
     {url: energyballUrl, name: "ball", tilingX: 32, tilingY: 32},
+    {url: grassAtlasUrl, name: "grassAtlas", tilingX: 64, tilingY: 64},
 ];
 
 
@@ -116,7 +118,7 @@ function rectToVertices(
     let tilingX, tilingY, startU, startV, endU, endV, r, g, b, a;
     if (texture) {
         const textureProps = textureURLs.find(t => t.name === texture);
-        if (texture !== "bricks"){
+        if (!texture.match(/brick|grass/)){
             startU = 0;
             startV = 0;
             tilingX = textureProps.tilingX;
@@ -395,6 +397,8 @@ export class Renderer {
                 return this.bindGroups[8];
             case "ball":
                 return this.bindGroups[9];
+            case "grass":
+                return this.bindGroups[10];
         }
     }
 
