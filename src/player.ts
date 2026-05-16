@@ -30,7 +30,7 @@ export class Player extends Rect {
         } else if (this.verticalSpeed < 0) {
             const multiplier: number = 1 / (1 + (gravity / 10));
             this.verticalSpeed *= multiplier;
-            if (this.verticalSpeed > -0.5) this.verticalSpeed = 0;
+            if (this.verticalSpeed > -1.0) this.verticalSpeed = 0;
         } else {
             const multiplier: number = 1 + (gravity / 10);
             this.verticalSpeed *= multiplier;
@@ -90,7 +90,7 @@ export class Player extends Rect {
     startJumping(): void {
         if (this.isJumping || this.isFalling) return;
         this.isJumping = true;
-        this.verticalSpeed = this.isStanding ? -20 : -10;
+        this.verticalSpeed = this.isStanding ? -30 : -15;
     }
 
     kill(){

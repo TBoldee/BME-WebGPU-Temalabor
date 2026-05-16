@@ -22,6 +22,7 @@ window.addEventListener('keydown', (event) => {
         case 'W':
         case 'w':
         case ' ':
+        case 'ArrowUp':
             currentLevel.player.startJumping();
             break;
         case 'A':
@@ -36,6 +37,9 @@ window.addEventListener('keydown', (event) => {
             break;
         case 'c':
         case 'C':
+        case 's':
+        case 'S':
+        case 'ArrowDown':
             currentLevel.player.lieDownIfPossible(currentLevel.getRectsForCollision());
             break;
         case 'r':
