@@ -17,6 +17,7 @@ canvas.addEventListener('mousedown', (event) => {
 });
 
 window.addEventListener('keydown', (event) => {
+    //if (event.repeat) return;
     currentLevel = Level.getCurrentLevel();
     switch (event.key) {
         case 'W':
@@ -28,6 +29,7 @@ window.addEventListener('keydown', (event) => {
         case 'A':
         case 'a':
         case 'ArrowLeft':
+            console.log("left")
             currentLevel.player.startMoveLeft();
             break;
         case 'D':

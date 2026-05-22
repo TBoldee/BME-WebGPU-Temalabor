@@ -74,11 +74,11 @@ function resolveCollisions(collidedRects: Rect[], player: Player): void {
 
     if (MTVY <= MTVX || (player.isFalling && player.horizontalSpeed === 0))  { //prefer vertical resolution if player is falling and not moving
         let dir = calculateMoveDirection(smallestMTVRect, player, "y");
-        player.move(0, MTVY * dir);
+        player.move(0, MTVY);
     } else if (MTVX < MTVY) {
         let dir = calculateMoveDirection(smallestMTVRect, player, "x");
         dir === 1 ? player.stopMoveLeft() : player.stopMoveRight();
-        player.move(MTVX * dir,0);
+        player.move(MTVX,0);
     }
 }
 
@@ -86,19 +86,15 @@ function calculateMinimumTranslationVector(rect: Rect, player: Player): [number,
     let xDistance: number;
     let [rectCenterX, rectCenterY] = calculateCenter(rect);
     let [playerCenterX, playerCenterY] = calculateCenter(player);
-    if (player.x <= rect.x){
-        xDistance = player.x + player.w - rect.x;
-    } else if (player.x > rect.x && playerCenterX < rectCenterX){
-        xDistance = player.x - rect.x + player.w;
+    if (playerCenterX <= rectCenterX){
+        xDistance = rect.x - (player.x + player.w);
     } else {
         xDistance = rect.x + rect.w - player.x;
     }
 
     let yDistance: number;
-    if (player.y <= rect.y){
-        yDistance = player.y + player.h - rect.y;
-    } else if (player.y > rect.y && playerCenterY < rectCenterY){
-        yDistance = player.y - rect.y + player.h;
+    if (playerCenterY <= rectCenterY){
+        yDistance = rect.y - (player.y + player.h);
     } else {
         yDistance = rect.y + rect.h - player.y;
     }
@@ -218,7 +214,7 @@ function sweptAABB(player: Player, rects: Rect[]) {
         const exitVector = findLastCollisions(player, rect);
         const entryTime = Math.max(...entryVector);
         const exitTime = Math.min(...exitVector);
-        if (entryTime <= 0.0001) continue;
+        //if (entryTime <= 0.0001) continue;
         if (entryTime <= exitTime && entryTime <= 1 && entryTime >= 0){
             if (entryTime < minEntryTime) {
                 minEntryTime = entryTime;
