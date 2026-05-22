@@ -43,6 +43,7 @@ export class Player extends Rect {
     }
 
     startMoveLeft(){
+        this.stopMoveRight()
         if (!this.isMovingLeft) {
             this.isMovingLeft = true;
             this.horizontalSpeed -= this.speed;
@@ -56,6 +57,7 @@ export class Player extends Rect {
         }
     }
     startMoveRight(){
+        this.stopMoveLeft()
         if (!this.isMovingRight) {
             this.isMovingRight = true;
             this.horizontalSpeed += this.speed;
@@ -94,8 +96,8 @@ export class Player extends Rect {
     }
 
     kill(){
-        this.stopMoveRight();
-        this.stopMoveLeft();
+        //this.stopMoveRight();
+        //this.stopMoveLeft();
         if (!this.isStanding) this.lieDown();
         this.isFalling = false;
         this.isJumping = false;

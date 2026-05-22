@@ -28,9 +28,9 @@ export function applyPhysics(level: Level, collisionResponseHandler: CollisionRe
         chaser.move();
     }
 
-    sweptAABB(player, level.getRectsForCollision());
+    sweptAABB(player, level.getRectsWithoutLavaForCollision());
 
-    getCollisionsAndResolve(level);
+    //getCollisionsAndResolve(level);
     if (checkGoal(level)) level.finish();
 }
 
@@ -84,8 +84,8 @@ function resolveCollisions(collidedRects: Rect[], player: Player): void {
 
 function calculateMinimumTranslationVector(rect: Rect, player: Player): [number,number] {
     let xDistance: number;
-    let [rectCenterX, rectCenterY] = calculateCenter(rect);
-    let [playerCenterX, playerCenterY] = calculateCenter(player);
+    let [rectCenterX, rectCenterY] = rect.getCenter();
+    let [playerCenterX, playerCenterY] = player.getCenter();
     if (playerCenterX <= rectCenterX){
         xDistance = rect.x - (player.x + player.w);
     } else {
@@ -101,13 +101,9 @@ function calculateMinimumTranslationVector(rect: Rect, player: Player): [number,
     return [xDistance, yDistance];
 }
 
-function calculateCenter(rect: Rect): [number, number] {
-    return [rect.x + rect.w/2, rect.y + rect.h/2];
-}
-
 function calculateMoveDirection(rect: Rect, player: Player, axis: "x" | "y"): -1 | 1 {
-    const [rectCenterX, rectCenterY] = calculateCenter(rect);
-    const [playerCenterX, playerCenterY] = calculateCenter(player);
+    const [rectCenterX, rectCenterY] = rect.getCenter();
+    const [playerCenterX, playerCenterY] = player.getCenter();
     if (axis === "x"){
         if (playerCenterX < rectCenterX) return -1;
         else return 1;
@@ -205,20 +201,34 @@ function findLastCollisions(player: Player, rect: Rect): [number, number]{
     return [xTime, yTime];
 }
 
-function sweptAABB(player: Player, rects: Rect[]) {
+function sweptAABB(player: Player, rects: Rect[]): void {
+    // Horizontal pass
+    const savedVertical = player.verticalSpeed;
+    player.verticalSpeed = 0;
+    resolvePass(player, rects);
+    player.verticalSpeed = savedVertical;
+
+    // Vertical pass
+    const savedHorizontal = player.horizontalSpeed;
+    player.horizontalSpeed = 0;
+    resolvePass(player, rects);
+    player.horizontalSpeed = savedHorizontal;
+}
+
+function resolvePass(player: Player, rects: Rect[]): void {
     let minEntryTime = 1;
-    let entryNormalForCollision = [0,0];
+    let entryNormalForCollision = [0, 0];
 
     for (const rect of rects) {
         const entryVector = findFirstCollisions(player, rect);
         const exitVector = findLastCollisions(player, rect);
         const entryTime = Math.max(...entryVector);
         const exitTime = Math.min(...exitVector);
-        //if (entryTime <= 0.0001) continue;
-        if (entryTime <= exitTime && entryTime <= 1 && entryTime >= 0){
+
+        if (entryTime < exitTime && entryTime < 1 && entryTime >= 0) {
             if (entryTime < minEntryTime) {
                 minEntryTime = entryTime;
-                if (entryTime === entryVector[0]) {
+                if (entryVector[0] > entryVector[1]) {
                     entryNormalForCollision = [player.horizontalSpeed > 0 ? -1 : 1, 0];
                 } else {
                     entryNormalForCollision = [0, player.verticalSpeed > 0 ? -1 : 1];
@@ -226,14 +236,21 @@ function sweptAABB(player: Player, rects: Rect[]) {
             }
         }
     }
+
     player.move(minEntryTime * player.horizontalSpeed, minEntryTime * player.verticalSpeed);
-    nullMovementBasedOnEntryNormal({x: entryNormalForCollision[0], y: entryNormalForCollision[1]}, player);
+    nullMovementBasedOnEntryNormal({ x: entryNormalForCollision[0], y: entryNormalForCollision[1] }, player);
 }
 
 function nullMovementBasedOnEntryNormal({x, y}: {x: number; y: number}, player: Player) {
-    if (y !== 0) player.verticalSpeed = 0;
-    if (x === -1) player.stopMoveRight();
-    else if (x === 1) player.stopMoveLeft();
+    if (y !== 0) {
+        player.verticalSpeed = 0;
+    }
+    if (x === -1) {
+        player.stopMoveRight();
+    }
+    else if (x === 1) {
+        player.stopMoveLeft();
+    }
 }
 
 export function checkGoal(level: Level){

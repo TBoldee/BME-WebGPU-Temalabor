@@ -33,8 +33,13 @@ export class Rect {
     }
 
     getTilePosition(): [number, number] {
+        const tileSideLength = 64;
         const centerX = this.x + this.w/2;
         const centerY = this.y + this.h/2;
-        return [Math.floor(centerX / 64), Math.floor(centerY / 64)];
+        return [Math.floor(centerX / tileSideLength), Math.floor(centerY / tileSideLength)];
+    }
+
+    getCenter(): [number, number] {
+        return [this.x + this.w/2, this.y + this.h/2];
     }
 }

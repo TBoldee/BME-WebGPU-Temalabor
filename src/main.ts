@@ -3,6 +3,7 @@ import {applyPhysics} from "./physics.ts";
 import './input.ts';
 import {Level} from "./level.ts";
 import {responseFunction} from "./collisionResponse.ts";
+import {applyPressedKeys} from "./input.ts";
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 const renderer = await Renderer.init(canvas);
@@ -21,6 +22,7 @@ async function frame(currentTime: number) {
     timeAccumulator += delta;
     if (!Level.hasWon){
         while (timeAccumulator >= timeStep) {
+            applyPressedKeys()
             applyPhysics(currentLevel, responseFunction);
             timeAccumulator -= timeStep;
         }
