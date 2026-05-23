@@ -320,7 +320,6 @@ export class Renderer {
 
         if(Level.levelChanged){
             this.rebuildStaticBuffers(staticRects);
-            this.rebuildDynamicTexturedBuffers(dynamicRects);
             Level.levelChanged = false;
         }
         this.rebuildDynamicTexturedBuffers(dynamicRects);
