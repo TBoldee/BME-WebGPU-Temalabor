@@ -4,7 +4,7 @@ import {Lava} from "./lava.ts";
 import type {Level} from "./level.ts";
 import {Enemy} from "./enemy.ts";
 import {Projectile} from "./projectile.ts";
-import {ChasingEnemy} from "./images/chasingEnemy.ts";
+import {ChasingEnemy} from "./chasingEnemy.ts";
 
 export type CollisionResponseHelper = (rects: Rect[], player: Player, level: Level) => void;
 

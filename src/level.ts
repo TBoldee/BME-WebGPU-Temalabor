@@ -1,8 +1,8 @@
 import {Player} from "./player.ts";
 import {Rect} from "./rect.ts";
-import {Lava} from "./lava.ts";
+import {Lava, Spike} from "./lava.ts";
 import {Enemy} from "./enemy.ts"
-import {ChasingEnemy} from "./images/chasingEnemy.ts";
+import {ChasingEnemy} from "./chasingEnemy.ts";
 
 export class Level {
     rects: Rect[][];
@@ -46,13 +46,16 @@ export class Level {
                 this.rects[row].push(new Rect(x, y, w, h, "red", "bricks"));
             } else if (str === "S"){
                 this.rects[row].push(new Rect(x, y, w, h, "brown", "bones"));
-            } else if (str === "X") {
+            } else if (str === "C") {
                 this.rects[row].push(new Rect(x, y, w, h, "blue", "cage"));
             } else if (str === "G") {
                 this.rects[row].push(new Rect(x, y, w, h, "green", "grass"));
             } else if (str === "L"){
                 this.rects[row].push(new Rect(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
                 this.lava.push(new Lava(x, y, w, h));
+            } else if (str === "X"){
+                this.rects[row].push(new Rect(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
+                this.lava.push(new Spike(x, y, w, h));
             } else if (str === "D") {
                 this.rects[row].push(new Rect(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
                 this.chasers.push(new ChasingEnemy(col,row))
@@ -61,8 +64,9 @@ export class Level {
                 this.startY = y + h - playerH;
                 this.player = new Player(this.startX, this.startY);
                 this.rects[row].push(new Rect(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
-            } else if (str === "#"){
-                this.goal = new Rect(x + (w-doorW)/2, y + h - doorH, doorW, doorH, "brown", "door");
+            } else if (str === "#" || str === "T"){
+                const texture = str === "#" ? "door" : "grave";
+                this.goal = new Rect(x + (w-doorW)/2, y + h - doorH, doorW, doorH, "brown", texture);
                 this.rects[row].push(new Rect(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
             }
             if (col === 13) this.rects[row].push(new Rect(x + w,y,w,h, "transparent")) //Blocker tile on right side
@@ -195,7 +199,7 @@ const levelOne: Level = new Level (
     B____________B
     B__________#_B
     B________BBBBB
-    BX+__BBBBBBSSB
+    BC+__BBBBBBSSB
     BBBBBBBSSBBBBB
     BSSSBBBBSSBBBB
     BBBBBBBBBBBBBB
@@ -232,7 +236,7 @@ const levelThree: Level = new Level (
     BBBBBB__BBBBBB
     BBBB______BBBB
     B____________B
-    BXXXXXXXXXXXXB
+    BCCCCCCCCCCCCB
     B+__________#B
     BB__SS__SS__BB
     B____________B
@@ -252,7 +256,7 @@ const levelFour: Level = new Level (
     BBBBBBBBBBBBBB
     B____________B
     B____________B
-    BX___X__X___XB
+    BC___C__C___CB
     B____________B
     B+__________#B
     BSSBBSSSSBSSSB
@@ -295,7 +299,7 @@ const levelSix: Level = new Level (
     ______________
     ______________
     ______________
-    _#____________
+    _T____________
     _G____________
     ____GG________
     ____GGG_______
@@ -317,48 +321,43 @@ const levelSeven: Level = new Level (
     B_B___________
     B+____________
     BSBBBBBBBBBB__
-    B___L__L__L__X
+    B___L__L__L__C
     B____________B
     _____________B
     ___BSBSBBBBBBS
     _BBBSSBBBB#___
     __SBBBSBBBBB__
     B____________B
-    B___________BX
+    B___________BC
     B_____________
-    BB__XX__X__BBB
+    BB__CC__C__BBB
     `,
     [
         new Enemy({x: 13, y: 1.5, endX: 13, endY: 1.5, shootingDirection: "left", shootingInterval: 20}),
         new Enemy({x: 0, y: 6, endX: 0, endY: 6, shootingDirection: "right", shootingInterval: 36}),
         new Enemy({x: 13, y: 12, endX: 13, endY: 12, shootingDirection: "left", shootingInterval: 50}),
-        //new Enemy({x: 13, y: 12, endX: 13, endY: 1.5, shootingDirection: "left", shootingInterval: 300}),
     ],
     "indigo"
 );
 
 const levelEight: Level = new Level (
     `
+    B#_BBBBBB__BBB
+    BB___B_______B
+    B____B_BXB___B
+    B_B__X__X___BB
+    B___BB__B__BBB
+    B_B_____B____B
+    B__BBBBBBBB__B
+    B___________BB
+    B____BBBBLLBBB
+    B____________B
+    B__B_________B
+    BBBBBBBBBBBB_B
+    BD_________L+B
     BBBBBBBBBBBBBB
-    B_B___________
-    B+____________
-    BSBBBBBBBBBB__
-    B___L__L__L__X
-    B____________B
-    _____________B
-    ___BSBSBBBBBBS
-    _BBBSSBBBB#___
-    __SBBBSBBBBB__
-    B____________B
-    B___________BX
-    B_____________
-    BB__XX__X__BBB
     `,
-    [
-        new Enemy({x: 13, y: 1.5, endX: 13, endY: 1.5, shootingDirection: "left", shootingInterval: 20}),
-        new Enemy({x: 0, y: 6, endX: 0, endY: 6, shootingDirection: "right", shootingInterval: 36}),
-        new Enemy({x: 13, y: 12, endX: 13, endY: 12, shootingDirection: "left", shootingInterval: 50}),
-    ],
+    [],
     "indigo"
 )
 

@@ -15,6 +15,8 @@ import bricksAtlasUrl from './images/purplebrickatlas.png'
 import cageUrl from './images/cage.png';
 import energyballUrl from './images/energyball.png';
 import grassAtlasUrl from './images/grassatlas.png'
+import graveUrl from './images/grave.png'
+import spikeUrl from './images/spike.png';
 
 type textureProps = {
     url: string;
@@ -33,6 +35,9 @@ const textureURLs:textureProps[] = [
     {url: cageUrl, name: "cage", tilingX: 64, tilingY: 64},
     {url: energyballUrl, name: "ball", tilingX: 32, tilingY: 32},
     {url: grassAtlasUrl, name: "grassAtlas", tilingX: 64, tilingY: 64},
+    {url: graveUrl, name: "grave", tilingX:32, tilingY: 64},
+    {url: spikeUrl, name: "spike", tilingX: 64, tilingY: 64},
+
 ];
 
 
@@ -396,6 +401,10 @@ export class Renderer {
                 return this.bindGroups[8];
             case "grass":
                 return this.bindGroups[9];
+            case "grave":
+                return this.bindGroups[10];
+            case "spike":
+                return this.bindGroups[11];
         }
     }
 

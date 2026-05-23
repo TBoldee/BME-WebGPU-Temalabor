@@ -1,5 +1,5 @@
-import {Rect} from "../rect.ts";
-import type {Player} from "../player.ts";
+import {Rect} from "./rect.ts";
+import type {Player} from "./player.ts";
 
 type coords = [number, number];
 
