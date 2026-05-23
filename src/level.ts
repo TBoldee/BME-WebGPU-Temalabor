@@ -19,7 +19,7 @@ export class Level {
     static currentLevelIndex: number = 0;
     static levelChanged: boolean = false;
 
-    constructor(layoutString: string, enemies: Enemy[], chasers: ChasingEnemy[], backgroundColor: string, gravity: number = 2) {
+    constructor(layoutString: string, enemies: Enemy[], backgroundColor: string, gravity: number = 2) {
         const w = 64;
         const h = 64;
         const doorW = 32;
@@ -28,6 +28,7 @@ export class Level {
         const playerH = 64;
         this.rects = [];
         for (let i = 0; i < 14; i++) {this.rects.push([]);}
+        this.chasers = [];
         this.lava = [];
 
         let tileStringArray = layoutString.match(/\S/g) ?? [];
@@ -52,6 +53,9 @@ export class Level {
             } else if (str === "L"){
                 this.rects[row].push(new Rect(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
                 this.lava.push(new Lava(x, y, w, h));
+            } else if (str === "D") {
+                this.rects[row].push(new Rect(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
+                this.chasers.push(new ChasingEnemy(col,row))
             } else if (str === "+"){
                 this.startX = x + (w-playerW)/2;
                 this.startY = y + h - playerH;
@@ -65,8 +69,7 @@ export class Level {
         }
         this.setTileVariants();
         this.enemies = enemies;
-        this.chasers = chasers;
-        for (const chaser of chasers) {
+        for (const chaser of this.chasers) {
             chaser.setTiles(this.rects);
             chaser.setPlayer(this.player);
         }
@@ -198,7 +201,6 @@ const levelOne: Level = new Level (
     BBBBBBBBBBBBBB
     `,
     [],
-    [],
     "indigo"
 );
 
@@ -219,7 +221,6 @@ const levelTwo: Level = new Level (
     BSSSSSSSSSSSSB
     BBBBBBBBBBBBBB
     `,
-    [],
     [],
     "indigo"
 );
@@ -242,7 +243,6 @@ const levelThree: Level = new Level (
     BBBBBBBBBBBBBB
     `,
     [],
-    [],
     "indigo"
 );
 
@@ -264,9 +264,8 @@ const levelFour: Level = new Level (
     BBBBBBBBBBBBBB
     `,
     [
-        new Enemy({x: 1, y: 2, endX: 12, endY: 2, patrolDuration: 90, shootingDirection: "down", shootingInterval: 150})
+        new Enemy({x: 1, y: 2, endX: 12, endY: 2, patrolDuration: 90, shootingDirection: "down", shootingInterval: 10})
     ],
-    [],
     "indigo"
 );
 
@@ -275,7 +274,7 @@ const levelFive: Level = new Level (
     BBBBBBBBBBBBBB
     BBBBBBBBBBBBBB
     BBBBBBBBBBBBBB
-    B____________B
+    BD___________B
     BBBBBBBBBBBB_B
     B____________B
     B_BBBBBBBBBBBB
@@ -288,9 +287,6 @@ const levelFive: Level = new Level (
     BBBBBLLLBBBBBB
     `,
     [],
-    [
-        new ChasingEnemy(1,3)
-    ],
     "indigo"
 );
 
@@ -312,11 +308,63 @@ const levelSix: Level = new Level (
     ______________
     `,
     [],
-    [],
     "skyblue"
 );
 
-levels.push(levelOne, levelTwo, levelThree, levelFour, levelFive, levelSix);
+const levelSeven: Level = new Level (
+    `
+    BBBBBBBBBBBBBB
+    B_B___________
+    B+____________
+    BSBBBBBBBBBB__
+    B___L__L__L__X
+    B____________B
+    _____________B
+    ___BSBSBBBBBBS
+    _BBBSSBBBB#___
+    __SBBBSBBBBB__
+    B____________B
+    B___________BX
+    B_____________
+    BB__XX__X__BBB
+    `,
+    [
+        new Enemy({x: 13, y: 1.5, endX: 13, endY: 1.5, shootingDirection: "left", shootingInterval: 20}),
+        new Enemy({x: 0, y: 6, endX: 0, endY: 6, shootingDirection: "right", shootingInterval: 36}),
+        new Enemy({x: 13, y: 12, endX: 13, endY: 12, shootingDirection: "left", shootingInterval: 50}),
+        //new Enemy({x: 13, y: 12, endX: 13, endY: 1.5, shootingDirection: "left", shootingInterval: 300}),
+    ],
+    "indigo"
+);
+
+const levelEight: Level = new Level (
+    `
+    BBBBBBBBBBBBBB
+    B_B___________
+    B+____________
+    BSBBBBBBBBBB__
+    B___L__L__L__X
+    B____________B
+    _____________B
+    ___BSBSBBBBBBS
+    _BBBSSBBBB#___
+    __SBBBSBBBBB__
+    B____________B
+    B___________BX
+    B_____________
+    BB__XX__X__BBB
+    `,
+    [
+        new Enemy({x: 13, y: 1.5, endX: 13, endY: 1.5, shootingDirection: "left", shootingInterval: 20}),
+        new Enemy({x: 0, y: 6, endX: 0, endY: 6, shootingDirection: "right", shootingInterval: 36}),
+        new Enemy({x: 13, y: 12, endX: 13, endY: 12, shootingDirection: "left", shootingInterval: 50}),
+    ],
+    "indigo"
+)
+
+levels.push(levelEight);
+
+//levels.push(levelOne, levelTwo, levelThree, levelFour, levelFive, levelSix);
 
 
 const fullstring = `

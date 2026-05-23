@@ -103,4 +103,8 @@ export class Player extends Rect {
         this.facing = "right";
     }
 
+    move(x: number, y: number) {
+        this.x = Math.floor(this.x + x);
+        this.y = Math.floor(this.y + y);
+    }
 }

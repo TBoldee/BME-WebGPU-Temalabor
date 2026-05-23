@@ -28,8 +28,8 @@ export class Rect {
     }
 
     move(x: number, y: number) {
-        this.x = Math.floor(this.x + x);
-        this.y = Math.floor(this.y + y);
+        this.x = this.x + x;
+        this.y = this.y + y;
     }
 
     getTilePosition(): [number, number] {

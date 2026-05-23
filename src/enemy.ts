@@ -10,10 +10,10 @@ export class Enemy extends Rect {
     verticalSpeed: number;
     patrolDuration: number;
     direction: "forward" | "backward";
-    private intervalId: number;
     bullets: Projectile[];
     shootingDirection: "none" | "left" | "right" | "up" | "down";
     shootingInterval: number;
+    private tickSinceLastShot: number;
     constructor({x, y, endX, endY, w = 1, h = 1, patrolDuration = 1, shootingDirection = "none", shootingInterval = 1000}:
                 {x: number, y: number, endX: number, endY: number, w?: number, h?: number, patrolDuration?: number, shootingDirection?: "none" | "left" | "right" | "up" | "down", shootingInterval?: number}) {
         super(x * 64, y * 64, w * 64, h * 64, "red", "demon");
@@ -28,6 +28,16 @@ export class Enemy extends Rect {
         this.bullets = [];
         this.shootingDirection = shootingDirection;
         this.shootingInterval = shootingInterval;
+        this.tickSinceLastShot = 0;
+    }
+
+    tick(){
+        this.moveAlongPath()
+        if (this.tickSinceLastShot >= this.shootingInterval){
+            this.shoot()
+            this.clearTimer()
+        }
+        this.tickSinceLastShot++
     }
 
     moveAlongPath(){
@@ -45,7 +55,15 @@ export class Enemy extends Rect {
                 else this.facing = "right";
             }
             this.verticalSpeed *= -1;
-            this.direction = this.direction === "forward" ? "backward" : "forward";
+            if (this.direction === "forward") {
+                this.direction = "backward";
+                this.x = this.endX;
+                this.y = this.endY;
+            } else {
+                this.direction = "forward";
+                this.x = this.startX;
+                this.y = this.startY;
+            }
         }
     }
 
@@ -55,12 +73,11 @@ export class Enemy extends Rect {
         this.verticalSpeed = (this.endY - this.startY) / this.patrolDuration;
         this.moveTo(this.startX, this.startY);
         this.clearTimer()
-        if (this.shootingDirection !== "none") this.intervalId = setInterval(() => {this.shoot()},this.shootingInterval);
         this.bullets = [];
     }
 
     clearTimer(){
-        if (this.intervalId) clearInterval(this.intervalId);
+        this.tickSinceLastShot = 0;
     }
 
     shoot(){

@@ -31,9 +31,10 @@ export class ChasingEnemy extends Rect {
     move(){
         let path;
         if (!this.currentGoal) {
+            const tileSize = 64;
             path = this.aStar();
             if (path.length === 0) return;
-            this.currentGoal = [(path[0][1]-1) * 64, path[0][0] * 64];
+            this.currentGoal = [(path[0][1]-1) * tileSize, path[0][0] * tileSize];
         }
         if (this.horizontalSpeed === 0 && this.verticalSpeed === 0) this.setSpeedForGoal();
 

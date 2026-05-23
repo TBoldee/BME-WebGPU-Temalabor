@@ -18,7 +18,7 @@ export function applyPhysics(level: Level, collisionResponseHandler: CollisionRe
         player.isJumping = false;
     }
     for (const enemy of level.enemies) {
-        enemy.moveAlongPath();
+        enemy.tick();
         for (const bullet of enemy.bullets) {
             bullet.applySpeed();
             if (getCollidedRects(level.getRectsForCollision(), bullet).length) enemy.bullets = enemy.bullets.filter(b => b !== bullet);
