@@ -24,6 +24,7 @@ async function frame(currentTime: number) {
         while (timeAccumulator >= timeStep) {
             applyPressedKeys()
             applyPhysics(currentLevel, responseFunction);
+            currentLevel.killPlayerIfOOB()
             timeAccumulator -= timeStep;
         }
     } else document.getElementById('victory').hidden = false;

@@ -33,34 +33,34 @@ export class ChasingEnemy extends Rect {
         if (!this.currentGoal) {
             path = this.aStar();
             if (path.length === 0) return;
-            this.currentGoal = [path[0][1], path[0][0]];
+            this.currentGoal = [(path[0][1]-1) * 64, path[0][0] * 64];
         }
         if (this.horizontalSpeed === 0 && this.verticalSpeed === 0) this.setSpeedForGoal();
 
         if (this.horizontalSpeed < 0){
-            if (this.x + this.horizontalSpeed <= this.currentGoal[0]*64) {
-                this.moveTo(this.currentGoal[0] * 64, this.y)
+            if (this.x + this.horizontalSpeed <= this.currentGoal[0]) {
+                this.moveTo(this.currentGoal[0], this.y)
                 this.horizontalSpeed = 0;
                 this.currentGoal = undefined;
                 return;
             }
         } else if (this.horizontalSpeed > 0){
-            if (this.x + this.horizontalSpeed >= this.currentGoal[0]*64) {
-                this.moveTo(this.currentGoal[0] * 64, this.y)
+            if (this.x + this.horizontalSpeed >= this.currentGoal[0]) {
+                this.moveTo(this.currentGoal[0], this.y)
                 this.horizontalSpeed = 0;
                 this.currentGoal = undefined;
                 return;
             }
         } else if (this.verticalSpeed < 0){
-            if (this.y + this.verticalSpeed <= this.currentGoal[1]*64) {
-                this.moveTo(this.x, this.currentGoal[1] * 64)
+            if (this.y + this.verticalSpeed <= this.currentGoal[1]) {
+                this.moveTo(this.x, this.currentGoal[1])
                 this.verticalSpeed = 0;
                 this.currentGoal = undefined;
                 return;
             }
         } else if (this.verticalSpeed > 0){
-            if (this.y + this.verticalSpeed >= this.currentGoal[1]*64) {
-                this.moveTo(this.x, this.currentGoal[1] * 64)
+            if (this.y + this.verticalSpeed >= this.currentGoal[1]) {
+                this.moveTo(this.x, this.currentGoal[1])
                 this.verticalSpeed = 0;
                 this.currentGoal = undefined;
                 return;
@@ -135,7 +135,7 @@ export class ChasingEnemy extends Rect {
     }
 
     private coordinatesInBounds(row: number, col: number): boolean {
-        return row >= 0 && row < this.tiles.length && col >= 0 && col < this.tiles[row]?.length;
+        return row >= 0 && row < this.tiles.length && col >= 1 && col < this.tiles[row]?.length-1;
     }
 
     private isImpassable(row: number, col: number): boolean {
@@ -151,7 +151,7 @@ export class ChasingEnemy extends Rect {
 
         let cur = current;
         while (cameFrom.has(this.getKey(cur[0], cur[1]))) {
-            const prev = cameFrom.get(this.getKey(cur[0], cur[1]))!;
+            const prev = cameFrom.get(this.getKey(cur[0], cur[1]));
             path.push(prev);
             cur = prev;
         }
@@ -163,11 +163,10 @@ export class ChasingEnemy extends Rect {
 
     private setSpeedForGoal(): void {
         const speed = 5;
-        const currentCoords: coords = this.getTilePosition();
-        if (this.currentGoal[0] < currentCoords[0]) this.horizontalSpeed = -speed;
-        else if (this.currentGoal[0] > currentCoords[0]) this.horizontalSpeed = speed;
-        else if (this.currentGoal[1] > currentCoords[1]) this.verticalSpeed = speed;
-        else if (this.currentGoal[1] < currentCoords[1]) this.verticalSpeed = -speed;
+        if (this.currentGoal[0] < this.x) this.horizontalSpeed = -speed;
+        else if (this.currentGoal[0] > this.x) this.horizontalSpeed = speed;
+        else if (this.currentGoal[1] > this.y) this.verticalSpeed = speed;
+        else if (this.currentGoal[1] < this.y) this.verticalSpeed = -speed;
     }
 
     reset() {

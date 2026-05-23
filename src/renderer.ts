@@ -5,7 +5,6 @@ import texturedQuadVertWGSL from '../shaders/textured_quad_vert.wgsl?raw';
 import { quitIfWebGPUNotAvailableOrMissingFeatures } from '../util/util.ts';
 import { Level } from "./level.ts";
 import type { Rect } from "./rect.ts";
-import bricksUrl from './images/purplebrick.png';
 import lavaUrl from './images/lava.png';
 import doorUrl from './images/door.png';
 import ghostUrl from './images/ghost.png';
@@ -24,14 +23,13 @@ type textureProps = {
     tilingY: number;
 }
 const textureURLs:textureProps[] = [
-    {url: bricksUrl, name: "bricks", tilingX: 64, tilingY: 64},
+    {url: bricksAtlasUrl, name: "bricksAtlas", tilingX: 64, tilingY: 64},
     {url: lavaUrl, name: "lava", tilingX:64, tilingY: 64},
     {url: doorUrl, name: "door", tilingX:32, tilingY: 64},
     {url: ghostUrl, name: "ghost", tilingX:24, tilingY: 64},
     {url: ghostLyingUrl, name: "ghostLying", tilingX:64, tilingY: 24},
     {url: bonesUrl, name: "bones", tilingX: 64, tilingY: 64},
     {url: demonUrl, name: "demon", tilingX: 64, tilingY: 64},
-    {url: bricksAtlasUrl, name: "bricksAtlas", tilingX: 64, tilingY: 64},
     {url: cageUrl, name: "cage", tilingX: 64, tilingY: 64},
     {url: energyballUrl, name: "ball", tilingX: 32, tilingY: 32},
     {url: grassAtlasUrl, name: "grassAtlas", tilingX: 64, tilingY: 64},
@@ -379,7 +377,7 @@ export class Renderer {
     private getBindGroupForTexture(texture: string): GPUBindGroup{
         switch (texture) {
             case "bricks":
-                return this.bindGroups[7];
+                return this.bindGroups[0];
             case "lava":
                 return this.bindGroups[1];
             case "door":
@@ -393,11 +391,11 @@ export class Renderer {
             case "demon":
                 return this.bindGroups[6];
             case "cage":
-                return this.bindGroups[8];
+                return this.bindGroups[7];
             case "ball":
-                return this.bindGroups[9];
+                return this.bindGroups[8];
             case "grass":
-                return this.bindGroups[10];
+                return this.bindGroups[9];
         }
     }
 

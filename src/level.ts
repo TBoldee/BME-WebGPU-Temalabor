@@ -38,6 +38,7 @@ export class Level {
             const col = i % 14;
             const x = col * w;
             const y = row * h;
+            if (col === 0) this.rects[row].push(new Rect(x - w,y,w,h, "transparent")) // Blocker tile on left side
             if (str === "_") {
               this.rects[row].push(new Rect(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
             } else if (str === "B"){
@@ -60,6 +61,7 @@ export class Level {
                 this.goal = new Rect(x + (w-doorW)/2, y + h - doorH, doorW, doorH, "brown", "door");
                 this.rects[row].push(new Rect(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
             }
+            if (col === 13) this.rects[row].push(new Rect(x + w,y,w,h, "transparent")) //Blocker tile on right side
         }
         this.setTileVariants();
         this.enemies = enemies;
@@ -145,6 +147,19 @@ export class Level {
         let hazards: Rect[] = [];
         hazards.push(...this.lava, ...this.enemies, ...this.getProjectiles(), ...this.chasers);
         return hazards;
+    }
+
+    killPlayerIfOOB(){
+        const player = this.player;
+        const leftX = 0;
+        const rightX = 896;
+        const bottomY = 896;
+        const topY = 0;
+        if (player.x <= leftX - player.w || player.x >= rightX ||
+            player.y >= bottomY || player.y <= topY - player.h) {
+            player.kill()
+            this.start()
+        }
     }
 
     private setTileVariants(): void {
@@ -292,8 +307,8 @@ const levelSix: Level = new Level (
     G__________GGG
     G______GGG__GG
     G+__GG_______G
-    GGGGGGGGGGGGGG
-    GGGGGGGGGGGGGG
+    GGGGGGGGGG_GGG
+    GGGGGGGGGG_GGG
     ______________
     `,
     [],
