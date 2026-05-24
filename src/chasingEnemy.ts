@@ -13,7 +13,7 @@ export class ChasingEnemy extends Rect {
     private verticalSpeed: number;
 
     constructor(x: number, y: number) {
-        super(x * 64,y * 64, 64, 64, "red", "demon");
+        super(x * 64,y * 64, 64, 64, "red", "beholder");
         this.startX = x * 64;
         this.startY = y * 64;
         this.horizontalSpeed = 0;

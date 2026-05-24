@@ -17,6 +17,7 @@ import energyballUrl from './images/energyball.png';
 import grassAtlasUrl from './images/grassatlas.png'
 import graveUrl from './images/grave.png'
 import spikeUrl from './images/spike.png';
+import beholderUrl from './images/beholder.png'
 
 type textureProps = {
     url: string;
@@ -37,7 +38,7 @@ const textureURLs:textureProps[] = [
     {url: grassAtlasUrl, name: "grassAtlas", tilingX: 64, tilingY: 64},
     {url: graveUrl, name: "grave", tilingX:32, tilingY: 64},
     {url: spikeUrl, name: "spike", tilingX: 64, tilingY: 64},
-
+    {url: beholderUrl, name: "beholder", tilingX: 64, tilingY: 64},
 ];
 
 
@@ -405,6 +406,8 @@ export class Renderer {
                 return this.bindGroups[10];
             case "spike":
                 return this.bindGroups[11];
+            case "beholder":
+                return this.bindGroups[12];
         }
     }
 
