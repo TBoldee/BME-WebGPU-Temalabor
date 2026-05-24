@@ -28,7 +28,7 @@ export class Enemy extends Rect {
     shootingInterval: number;
     private tickSinceLastShot: number;
     private shootingDelay: number;
-    constructor({x, y, endX, endY, w = 1, h = 1, patrolDuration = 1, shootingDirection = "none", shootingInterval = 60, shootingDelay = 0}: enemyProps) {
+    constructor({x, y, endX, endY, w = 1, h = 1, patrolDuration = 1, shootingDirection = "none", shootingInterval = 0, shootingDelay = 0}: enemyProps) {
         super(x * 64, y * 64, w * 64, h * 64, "red", "demon");
         this.startX = x * 64;
         this.startY = y * 64;
@@ -95,6 +95,7 @@ export class Enemy extends Rect {
     }
 
     shoot(){
+        if (this.shootingDirection == "none") return
         const projectileW = 32;
         const projectileH = 32;
         let projectileX, projectileY;

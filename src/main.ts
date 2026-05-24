@@ -18,9 +18,9 @@ async function frame(currentTime: number) {
         lastTime = currentTime;
     }
 
-    const delta = Math.min(currentTime - lastTime, 250);
-    timeAccumulator += delta;
-    if (!Level.hasWon){
+    if (!Level.hasWon) {
+        const delta = Math.min(currentTime - lastTime, 250);
+        timeAccumulator += delta;
         while (timeAccumulator >= timeStep) {
             applyPressedKeys()
             applyPhysics(currentLevel, responseFunction);
