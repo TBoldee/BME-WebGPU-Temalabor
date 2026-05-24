@@ -354,31 +354,78 @@ const levelEight: Level = new Level (
     B____________B
     B__B_________B
     BBBBBBBBBBBB_B
-    BD_________L+B
+    BD_________X+B
     BBBBBBBBBBBBBB
     `,
     [],
     "indigo"
 )
 
-levels.push(levelEight);
+const levelNine: Level = new Level(
+    `
+    BBBBBBBBBBBBBB
+    B_________B__B
+    B_________B__B
+    B___B___B_B+_B
+    BBBB_BBB_BBB_B
+    _____________B
+    _____________B
+    B__BBBBBBBBBBB
+    B____________B
+    B____________B
+    B____________B
+    B____________B
+    B#___________B
+    BBBBBBBBBBBBBB
+    `,
+    [
+        new Enemy({x: 4, y: 4, endX: 4, endY: 4, shootingDirection: "down", shootingInterval: 40}),
+        new Enemy({x: 8, y: 4, endX: 8, endY: 4, shootingDirection: "down", shootingInterval: 40}),
+        new Enemy({x: 0, y: 5, endX: 0, endY: 5, shootingDirection: "right", shootingInterval: 40, shootingDelay: 20}),
+        new Enemy({x: 0, y: 6, endX: 0, endY: 6, shootingDirection: "right", shootingInterval: 40}),
+    ],
+    "indigo"
+)
+
+const levelTen: Level = new Level (
+    `
+    B#_BBBBBB__BBB
+    BB___B_______B
+    B____B_BXB___B
+    B_B__X__X___BB
+    B___BB__B__BBB
+    B_B_____B____B
+    B__BBBBBBBB__B
+    B___________BB
+    B____BBBBLLBBB
+    B____________B
+    B__B_________B
+    BBBBBBBBBBBB_B
+    BD_________X+B
+    BBBBBBBBBBBBBB
+    `,
+    [],
+    "indigo"
+)
+
+levels.push(levelNine);
 
 //levels.push(levelOne, levelTwo, levelThree, levelFour, levelFive, levelSix);
 
 
-const fullstring = `
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-`;
+/*
+BBBBBBBBBBBBBB
+BBBBBBBBBBBBBB
+BBBBBBBBBBBBBB
+BBBBBBBBBBBBBB
+BBBBBBBBBBBBBB
+BBBBBBBBBBBBBB
+BBBBBBBBBBBBBB
+BBBBBBBBBBBBBB
+BBBBBBBBBBBBBB
+BBBBBBBBBBBBBB
+BBBBBBBBBBBBBB
+BBBBBBBBBBBBBB
+BBBBBBBBBBBBBB
+BBBBBBBBBBBBBB
+ */

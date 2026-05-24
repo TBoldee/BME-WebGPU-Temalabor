@@ -1,6 +1,19 @@
 import {Rect} from "./rect.ts";
 import {Projectile} from "./projectile.ts";
 
+type enemyProps = {
+    x: number,
+    y: number,
+    endX: number,
+    endY: number,
+    w?: number,
+    h?: number,
+    patrolDuration?: number,
+    shootingDirection?: "none" | "left" | "right" | "up" | "down",
+    shootingInterval?: number,
+    shootingDelay?: number,
+}
+
 export class Enemy extends Rect {
     startX: number;
     startY: number;
@@ -14,8 +27,8 @@ export class Enemy extends Rect {
     shootingDirection: "none" | "left" | "right" | "up" | "down";
     shootingInterval: number;
     private tickSinceLastShot: number;
-    constructor({x, y, endX, endY, w = 1, h = 1, patrolDuration = 1, shootingDirection = "none", shootingInterval = 1000}:
-                {x: number, y: number, endX: number, endY: number, w?: number, h?: number, patrolDuration?: number, shootingDirection?: "none" | "left" | "right" | "up" | "down", shootingInterval?: number}) {
+    private shootingDelay: number;
+    constructor({x, y, endX, endY, w = 1, h = 1, patrolDuration = 1, shootingDirection = "none", shootingInterval = 60, shootingDelay = 0}: enemyProps) {
         super(x * 64, y * 64, w * 64, h * 64, "red", "demon");
         this.startX = x * 64;
         this.startY = y * 64;
@@ -28,7 +41,8 @@ export class Enemy extends Rect {
         this.bullets = [];
         this.shootingDirection = shootingDirection;
         this.shootingInterval = shootingInterval;
-        this.tickSinceLastShot = 0;
+        this.tickSinceLastShot = shootingDelay;
+        this.shootingDelay = shootingDelay
     }
 
     tick(){
@@ -72,7 +86,7 @@ export class Enemy extends Rect {
         this.horizontalSpeed = (this.endX - this.startX) / this.patrolDuration;
         this.verticalSpeed = (this.endY - this.startY) / this.patrolDuration;
         this.moveTo(this.startX, this.startY);
-        this.clearTimer()
+        this.tickSinceLastShot = this.shootingDelay;
         this.bullets = [];
     }
 
