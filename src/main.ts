@@ -32,7 +32,7 @@ async function frame(currentTime: number) {
     lastTime = currentTime;
 
     currentLevel = Level.getCurrentLevel();
-    renderer.render(currentLevel).catch(console.error);
+    await renderer.render(currentLevel).catch(console.error);
     requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

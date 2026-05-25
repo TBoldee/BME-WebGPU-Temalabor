@@ -14,13 +14,8 @@ canvas.addEventListener('mousedown', (event) => {
         currentLevel.player.moveTo(x, y);
         getCollisionsAndResolve(currentLevel);
         console.log(`Clicked: ${x} : ${y}`);
-    } else if (event.button === 2) {
-        getCollisionsAndResolve(currentLevel);
-        let x = currentLevel.player.x;
-        let y = currentLevel.player.y;
-        console.log(`Clicked: ${x} : ${y}`);
     }
-});
+})
 
 window.addEventListener('keydown', (event) => {
     const key = event.key;
@@ -64,7 +59,6 @@ window.addEventListener('keydown', (event) => {
         default:
             break;
     }
-    getCollisionsAndResolve(currentLevel);
 })
 
 window.addEventListener('keyup', (event) => {
