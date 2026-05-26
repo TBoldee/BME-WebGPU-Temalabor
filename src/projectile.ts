@@ -1,6 +1,6 @@
-import {VisualRect} from "./visualRect.ts";
+import {Hazard} from "./hazard.ts";
 
-export class Projectile extends VisualRect {
+export class Projectile extends Hazard {
     horizontalSpeed: number;
     verticalSpeed: number;
 
