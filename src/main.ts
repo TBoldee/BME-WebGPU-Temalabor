@@ -7,6 +7,7 @@ import {applyPressedKeys} from "./input.ts";
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 const renderer = await Renderer.init(canvas);
+Level.init()
 let currentLevel: Level = Level.getCurrentLevel();
 currentLevel.start();
 const timeStep = 1000 / 60;

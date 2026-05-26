@@ -22,6 +22,7 @@ export class Level {
     static hasWon: boolean = false;
     static currentLevelIndex: number = 0;
     static levelChanged: boolean = false;
+    static levels: Level[] = [];
 
     constructor(layoutString: string, enemies: PatrolEnemy[], backgroundColor: string, gravity: number = 2) {
         const w = 1;
@@ -81,13 +82,13 @@ export class Level {
         this.gravity = gravity;
     }
 
-    public static getCurrentLevel(): Level{
-        return levels[Level.currentLevelIndex];
+    public static getCurrentLevel(): Level {
+        return Level.levels[Level.currentLevelIndex];
     }
 
     finish(){
-        if (levels.length > Level.currentLevelIndex + 1) {
-            levels[++Level.currentLevelIndex].start();
+        if (Level.levels.length > Level.currentLevelIndex + 1) {
+            Level.levels[++Level.currentLevelIndex].start();
         } else Level.hasWon = true;
     }
 
@@ -102,7 +103,7 @@ export class Level {
     static restartGame(){
         Level.currentLevelIndex = 0;
         this.hasWon = false;
-        levels[Level.currentLevelIndex].start();
+        Level.levels[Level.currentLevelIndex].start();
     }
 
     tick(): void {
@@ -196,241 +197,243 @@ export class Level {
         }
     }
 
+    static init (){
+        const levelOne: Level = new Level (
+            `
+            BBBBBBBBBBBBBB
+            BBBBBBBBBBBBBB
+            BBBBBBBBBBBBBB
+            BBBBBBBBBBBBBB
+            BBBBBBBBBBBBBB
+            B____________B
+            B____________B
+            B____________B
+            B__________#_B
+            B________BBBBB
+            BC+__BBBBBBSSB
+            BBBBBBBSSBBBBB
+            BSSSBBBBSSBBBB
+            BBBBBBBBBBBBBB
+            `,
+            [],
+            "indigo"
+        );
+
+        const levelTwo: Level = new Level (
+            `
+            BBBBBBBBBBBBBB
+            BBBBBBBBBBBBBB
+            BBBBBB__BBBBBB
+            BBBB______BBBB
+            B____________B
+            B____________B
+            B+__________#B
+            BB__SS__SS__BB
+            B____________B
+            B____________B
+            B____________B
+            BLLLLLLLLLLLLB
+            BSSSSSSSSSSSSB
+            BBBBBBBBBBBBBB
+            `,
+            [],
+            "indigo"
+        );
+
+        const levelThree: Level = new Level (
+            `
+            BBBBBBBBBBBBBB
+            BBBBBBBBBBBBBB
+            BBBBBB__BBBBBB
+            BBBB______BBBB
+            B____________B
+            BCCCCCCCCCCCCB
+            B+__________#B
+            BB__SS__SS__BB
+            B____________B
+            B____________B
+            B____________B
+            BLLLLLLLLLLLLB
+            BSSSSSSSSSSSSB
+            BBBBBBBBBBBBBB
+            `,
+            [],
+            "indigo"
+        );
+
+        const levelFour: Level = new Level (
+            `
+            BBBBBBBBBBBBBB
+            BBBBBBBBBBBBBB
+            B____________B
+            B____________B
+            BC___C__C___CB
+            B____________B
+            B+__________#B
+            BSSBBSSSSBSSSB
+            BSSSSSSSBBSSSB
+            BSSBBBSSSSSSSB
+            BSBBBBSSBBBSSB
+            BSSBBSSSBBBBSB
+            BBBBBSSBBBSSSB
+            BBBBBBBBBBBBBB
+            `,
+            [
+                new PatrolEnemy({startCol: 1, startRow: 2, endCol: 12, endRow: 2, patrolDuration: 90, shootingDirection: "down", shootingInterval: 10})
+            ],
+            "indigo"
+        );
+
+        const levelFive: Level = new Level (
+            `
+            BBBBBBBBBBBBBB
+            BBBBBBBBBBBBBB
+            BBBBBBBBBBBBBB
+            BBBBBBBBBBBBDB
+            BBBBBBBBBBBB_B
+            B____________B
+            B_BBBBBBBBBBBB
+            B_B________BBB
+            B_B__________B
+            B+B____BLBBB_B
+            B___B___B____B
+            B__BB___B_BBBB
+            B_BBB___B___#B
+            BBBBBLLLBBBBBB
+            `,
+            [],
+            "indigo"
+        );
+
+        const levelSix: Level = new Level (
+            `
+            BBBBBBBBBBBBBB
+            B+__B________B
+            BBB_B________B
+            B___BX__B____B
+            B__BB__BB____B
+            B___B__XB____B
+            BB__BB__B____B
+            B___B___B____B
+            B__B___BB____B
+            BB__B___B____B
+            B___BB__B____B
+            B__BB__BB____B
+            B_______B___#B
+            BBLBBBBBBBBBBB
+            `,
+            [
+                new PatrolEnemy({startCol: 2, startRow: 3, endCol: 2, endRow: 12, patrolDuration: 120, shootingDirection: "none"}),
+                new PatrolEnemy({startCol: 2, startRow: 12, endCol: 2, endRow: 3, patrolDuration: 80, shootingDirection: "none"}),
+                new PatrolEnemy({startCol: 9, startRow: 5, endCol: 12, endRow: 5, patrolDuration: 40, shootingDirection: "none"}),
+                new PatrolEnemy({startCol: 9, startRow: 8, endCol: 12, endRow: 8, patrolDuration: 35, shootingDirection: "none"}),
+                new PatrolEnemy({startCol: 10, startRow: 7, endCol: 12, endRow: 11, patrolDuration: 45, shootingDirection: "none"}),
+                new PatrolEnemy({startCol: 9, startRow: 6, endCol: 11, endRow: 3, patrolDuration: 50, shootingDirection: "none"}),
+                new PatrolEnemy({startCol: 4, startRow: 8, endCol: 4, endRow: 8, shootingDirection: "right", shootingInterval: 30}),
+            ],
+            "indigo"
+        )
+
+        const levelSeven: Level = new Level (
+            `
+            B#_BBBBBB__BBB
+            BB___B_______B
+            B____B_BXB___B
+            B_B__X__X___BB
+            B___BB__B__BBB
+            B_B_____B____B
+            B__BBBBBBBB__B
+            B___________BB
+            B____BBBBLLBBB
+            B____________B
+            B__B_________B
+            BBBBBBBBBBBB_B
+            BD_________X+B
+            BBBBBBBBBBBBBB
+            `,
+            [],
+            "indigo"
+        )
+
+        const levelEight: Level = new Level(
+            `
+            BBBBBBBBBBBBBB
+            BLLLBSCSBSB+_B
+            BBBB_BBB_BBB_B
+            _____________B
+            _____________B
+            B__BBBBBBBBBBB
+            BB__BXXXX____X
+            BBB_B________X
+            BBB_______BX_X
+            BBB_B_____B__X
+            BBBLBLLLLBB_BB
+            B____________B
+            B#____________
+            BBBBBBBBBBBBBB
+            `,
+            [
+                new PatrolEnemy({startCol: 4, startRow: 2, endCol: 4, endRow: 2, shootingDirection: "down", shootingInterval: 40}),
+                new PatrolEnemy({startCol: 8, startRow: 2, endCol: 8, endRow: 2, shootingDirection: "down", shootingInterval: 40}),
+                new PatrolEnemy({startCol: 0, startRow: 3, endCol: 0, endRow: 3, shootingDirection: "right", shootingInterval: 60, shootingDelay: 30}),
+                new PatrolEnemy({startCol: 0, startRow: 4, endCol: 0, endRow: 4, shootingDirection: "right", shootingInterval: 60}),
+                new PatrolEnemy({startCol: 13, startRow: 12, endCol: 13, endRow: 12, shootingDirection: "left", shootingInterval: 30}),
+            ],
+            "indigo"
+        )
+
+        const levelNine: Level = new Level (
+            `
+            BBBBBBBBBBBBBB
+            B_B___________
+            B+____________
+            BSBBBBBBBBBB__
+            B___X__X__X__C
+            B____________B
+            _____________B
+            ___BSBSBBBBBBS
+            _BBBSSBBBS#___
+            __SBBBSBBSSS__
+            B____________B
+            B___________BC
+            B_____________
+            BB__CC__C__BBB
+            `,
+            [
+                new PatrolEnemy({startCol: 13, startRow: 1.5, endCol: 13, endRow: 1.5, shootingDirection: "left", shootingInterval: 20}),
+                new PatrolEnemy({startCol: 0, startRow: 6, endCol: 0, endRow: 6, shootingDirection: "right", shootingInterval: 36}),
+                new PatrolEnemy({startCol: 13, startRow: 12, endCol: 13, endRow: 12, shootingDirection: "left", shootingInterval: 50}),
+            ],
+            "indigo"
+        );
+
+        const levelTen: Level = new Level (
+            `
+            ______________
+            ______________
+            ______________
+            ______________
+            ______________
+            ______________
+            ______________
+            ______________
+            ___________T__
+            ___________G__
+            G+__GGGGGGGGGG
+            GGGGGGGGGGGGGG
+            GGGGGGGGGGGGGG
+            GGGGGGGGGGGGGG
+            `,
+            [],
+            "skyblue"
+        );
+
+        Level.levels.push(levelOne, levelTwo, levelThree, levelFour, levelFive, levelSix, levelSeven, levelEight, levelNine, levelTen);
+    }
+
 }
 
-const levels: Level[] = [];
 
-const levelOne: Level = new Level (
-    `
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    B____________B
-    B____________B
-    B____________B
-    B__________#_B
-    B________BBBBB
-    BC+__BBBBBBSSB
-    BBBBBBBSSBBBBB
-    BSSSBBBBSSBBBB
-    BBBBBBBBBBBBBB
-    `,
-    [],
-    "indigo"
-);
-
-const levelTwo: Level = new Level (
-    `
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBB__BBBBBB
-    BBBB______BBBB
-    B____________B
-    B____________B
-    B+__________#B
-    BB__SS__SS__BB
-    B____________B
-    B____________B
-    B____________B
-    BLLLLLLLLLLLLB
-    BSSSSSSSSSSSSB
-    BBBBBBBBBBBBBB
-    `,
-    [],
-    "indigo"
-);
-
-const levelThree: Level = new Level (
-    `
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBB__BBBBBB
-    BBBB______BBBB
-    B____________B
-    BCCCCCCCCCCCCB
-    B+__________#B
-    BB__SS__SS__BB
-    B____________B
-    B____________B
-    B____________B
-    BLLLLLLLLLLLLB
-    BSSSSSSSSSSSSB
-    BBBBBBBBBBBBBB
-    `,
-    [],
-    "indigo"
-);
-
-const levelFour: Level = new Level (
-    `
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    B____________B
-    B____________B
-    BC___C__C___CB
-    B____________B
-    B+__________#B
-    BSSBBSSSSBSSSB
-    BSSSSSSSBBSSSB
-    BSSBBBSSSSSSSB
-    BSBBBBSSBBBSSB
-    BSSBBSSSBBBBSB
-    BBBBBSSBBBSSSB
-    BBBBBBBBBBBBBB
-    `,
-    [
-        new PatrolEnemy({startCol: 1, startRow: 2, endCol: 12, endRow: 2, patrolDuration: 90, shootingDirection: "down", shootingInterval: 10})
-    ],
-    "indigo"
-);
-
-const levelFive: Level = new Level (
-    `
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBBB
-    BBBBBBBBBBBBDB
-    BBBBBBBBBBBB_B
-    B____________B
-    B_BBBBBBBBBBBB
-    B_B________BBB
-    B_B__________B
-    B+B____BLBBB_B
-    B___B___B____B
-    B__BB___B_BBBB
-    B_BBB___B___#B
-    BBBBBLLLBBBBBB
-    `,
-    [],
-    "indigo"
-);
-
-const levelSix: Level = new Level (
-    `
-    BBBBBBBBBBBBBB
-    B+__B________B
-    BBB_B________B
-    B___BX__B____B
-    B__BB__BB____B
-    B___B__XB____B
-    BB__BB__B____B
-    B___B___B____B
-    B__B___BB____B
-    BB__B___B____B
-    B___BB__B____B
-    B__BB__BB____B
-    B_______B___#B
-    BBLBBBBBBBBBBB
-    `,
-    [
-        new PatrolEnemy({startCol: 2, startRow: 3, endCol: 2, endRow: 12, patrolDuration: 120, shootingDirection: "none"}),
-        new PatrolEnemy({startCol: 2, startRow: 12, endCol: 2, endRow: 3, patrolDuration: 80, shootingDirection: "none"}),
-        new PatrolEnemy({startCol: 9, startRow: 5, endCol: 12, endRow: 5, patrolDuration: 40, shootingDirection: "none"}),
-        new PatrolEnemy({startCol: 9, startRow: 8, endCol: 12, endRow: 8, patrolDuration: 35, shootingDirection: "none"}),
-        new PatrolEnemy({startCol: 10, startRow: 7, endCol: 12, endRow: 11, patrolDuration: 45, shootingDirection: "none"}),
-        new PatrolEnemy({startCol: 9, startRow: 6, endCol: 11, endRow: 3, patrolDuration: 50, shootingDirection: "none"}),
-        new PatrolEnemy({startCol: 4, startRow: 8, endCol: 4, endRow: 8, shootingDirection: "right", shootingInterval: 30}),
-    ],
-    "indigo"
-)
-
-const levelSeven: Level = new Level (
-    `
-    B#_BBBBBB__BBB
-    BB___B_______B
-    B____B_BXB___B
-    B_B__X__X___BB
-    B___BB__B__BBB
-    B_B_____B____B
-    B__BBBBBBBB__B
-    B___________BB
-    B____BBBBLLBBB
-    B____________B
-    B__B_________B
-    BBBBBBBBBBBB_B
-    BD_________X+B
-    BBBBBBBBBBBBBB
-    `,
-    [],
-    "indigo"
-)
-
-const levelEight: Level = new Level(
-    `
-    BBBBBBBBBBBBBB
-    BLLLBSCSBSB+_B
-    BBBB_BBB_BBB_B
-    _____________B
-    _____________B
-    B__BBBBBBBBBBB
-    BB__BXXXX____X
-    BBB_B________X
-    BBB_______BX_X
-    BBB_B_____B__X
-    BBBLBLLLLBB_BB
-    B____________B
-    B#____________
-    BBBBBBBBBBBBBB
-    `,
-    [
-        new PatrolEnemy({startCol: 4, startRow: 2, endCol: 4, endRow: 2, shootingDirection: "down", shootingInterval: 40}),
-        new PatrolEnemy({startCol: 8, startRow: 2, endCol: 8, endRow: 2, shootingDirection: "down", shootingInterval: 40}),
-        new PatrolEnemy({startCol: 0, startRow: 3, endCol: 0, endRow: 3, shootingDirection: "right", shootingInterval: 60, shootingDelay: 30}),
-        new PatrolEnemy({startCol: 0, startRow: 4, endCol: 0, endRow: 4, shootingDirection: "right", shootingInterval: 60}),
-        new PatrolEnemy({startCol: 13, startRow: 12, endCol: 13, endRow: 12, shootingDirection: "left", shootingInterval: 30}),
-    ],
-    "indigo"
-)
-
-const levelNine: Level = new Level (
-    `
-    BBBBBBBBBBBBBB
-    B_B___________
-    B+____________
-    BSBBBBBBBBBB__
-    B___X__X__X__C
-    B____________B
-    _____________B
-    ___BSBSBBBBBBS
-    _BBBSSBBBS#___
-    __SBBBSBBSSS__
-    B____________B
-    B___________BC
-    B_____________
-    BB__CC__C__BBB
-    `,
-    [
-        new PatrolEnemy({startCol: 13, startRow: 1.5, endCol: 13, endRow: 1.5, shootingDirection: "left", shootingInterval: 20}),
-        new PatrolEnemy({startCol: 0, startRow: 6, endCol: 0, endRow: 6, shootingDirection: "right", shootingInterval: 36}),
-        new PatrolEnemy({startCol: 13, startRow: 12, endCol: 13, endRow: 12, shootingDirection: "left", shootingInterval: 50}),
-    ],
-    "indigo"
-);
-
-const levelTen: Level = new Level (
-    `
-    ______________
-    ______________
-    ______________
-    ______________
-    ______________
-    ______________
-    ______________
-    ______________
-    ___________T__
-    ___________G__
-    G+__GGGGGGGGGG
-    GGGGGGGGGGGGGG
-    GGGGGGGGGGGGGG
-    GGGGGGGGGGGGGG
-    `,
-    [],
-    "skyblue"
-);
-
-levels.push(levelOne, levelTwo, levelThree, levelFour, levelFive, levelSix, levelSeven, levelEight, levelNine, levelTen);
 
 
 /*
