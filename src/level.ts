@@ -15,20 +15,14 @@ export class Level {
     goal: Goal;
     player: Player;
     background: VisualRect;
-    startX: number;
-    startY: number;
     gravity: number;
     static hasWon: boolean = false;
     static currentLevelIndex: number = 0;
     static levelChanged: boolean = false;
 
     constructor(layoutString: string, enemies: PatrolEnemy[], backgroundColor: string, gravity: number = 2) {
-        const w = 64;
-        const h = 64;
-        const doorW = 32;
-        const doorH = 64;
-        const playerW = 24;
-        const playerH = 64;
+        const w = 1;
+        const h = 1;
         this.tiles = [];
         for (let i = 0; i < 14; i++) {this.tiles.push([]);}
         this.chasers = [];
@@ -40,39 +34,35 @@ export class Level {
             let str = tileStringArray[i];
             const row = Math.floor(i / 14);
             const col = i % 14;
-            const x = col * w; //TODO tile index
-            const y = row * h;
-            if (col === 0) this.tiles[row].push(new Tile(x - w,y,w,h, "transparent")) // Blocker tile on left side
+            if (col === 0) this.tiles[row].push(new Tile(col, row, w, h, "transparent")) // Blocker tile on left side
             if (str === "_") {
               this.tiles[row].push(new Tile(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
             } else if (str === "B"){
-                this.tiles[row].push(new Tile(x, y, w, h, "red", "bricks"));
+                this.tiles[row].push(new Tile(col, row, w, h, "red", "bricks"));
             } else if (str === "S"){
-                this.tiles[row].push(new Tile(x, y, w, h, "brown", "bones"));
+                this.tiles[row].push(new Tile(col, row, w, h, "brown", "bones"));
             } else if (str === "C") {
-                this.tiles[row].push(new Tile(x, y, w, h, "blue", "cage"));
+                this.tiles[row].push(new Tile(col, row, w, h, "blue", "cage"));
             } else if (str === "G") {
-                this.tiles[row].push(new Tile(x, y, w, h, "green", "grass"));
+                this.tiles[row].push(new Tile(col, row, w, h, "green", "grass"));
             } else if (str === "L"){
                 this.tiles[row].push(new Tile(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
-                this.lava.push(new Lava(x, y, w, h));
+                this.lava.push(new Lava(col, row, w, h));
             } else if (str === "X"){
                 this.tiles[row].push(new Tile(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
-                this.lava.push(new Spike(x, y, w, h));
+                this.lava.push(new Spike(col, row, w, h));
             } else if (str === "D") {
                 this.tiles[row].push(new Tile(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
-                this.chasers.push(new ChasingEnemy(col,row))
+                this.chasers.push(new ChasingEnemy(col, row))
             } else if (str === "+"){
-                this.startX = x + (w-playerW)/2;
-                this.startY = y + h - playerH;
-                this.player = new Player(this.startX, this.startY);
+                this.player = new Player(col, row);
                 this.tiles[row].push(new Tile(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
             } else if (str === "#" || str === "T"){
                 const texture = str === "#" ? "door" : "grave";
-                this.goal = new Goal(x + (w-doorW)/2, y + h - doorH, doorW, doorH, texture);
+                this.goal = new Goal(col, row, texture);
                 this.tiles[row].push(new Tile(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
             }
-            if (col === 13) this.tiles[row].push(new Tile(x + w,y,w,h, "transparent")) //Blocker tile on right side
+            if (col === 13) this.tiles[row].push(new Tile(col, row, w, h, "transparent")) //Blocker tile on right side
         }
         this.setTileVariants();
         this.enemies = enemies;
@@ -96,9 +86,7 @@ export class Level {
     }
 
     start() {
-        this.player.moveTo(this.startX, this.startY);
-        this.player.stopMoveRight()
-        this.player.stopMoveLeft()
+        this.player.kill()
         this.enemies.forEach(enemy => enemy.reset());
         this.chasers.forEach(chaser => chaser.reset());
         Level.levelChanged = true;

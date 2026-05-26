@@ -10,7 +10,6 @@ export type CollisionResponseHelper = (rects: Rect[], player: Player, level: Lev
 export function responseFunction (rects: Rect[], player: Player, level: Level):void {
     for (const rect of rects) {
         if (rect instanceof Hazard || rect instanceof PatrolEnemy || rect instanceof ChasingEnemy) {
-            player.kill();
             level.start();
         }
     }

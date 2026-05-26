@@ -38,7 +38,7 @@ export class PatrolEnemy extends Enemy {
         this.bullets = [];
         this.shootingDirection = shootingDirection;
         this.shootingInterval = shootingInterval;
-        this.tickSinceLastShot = shootingDelay;
+        this.tickSinceLastShot = -shootingDelay;
         this.shootingDelay = shootingDelay
     }
 
@@ -83,7 +83,7 @@ export class PatrolEnemy extends Enemy {
         this.horizontalSpeed = (this.endX - this.startX) / this.patrolDuration;
         this.verticalSpeed = (this.endY - this.startY) / this.patrolDuration;
         this.moveTo(this.startX, this.startY);
-        this.tickSinceLastShot = this.shootingDelay;
+        this.tickSinceLastShot = -this.shootingDelay;
         this.bullets = [];
     }
 

@@ -11,9 +11,18 @@ export class Player extends VisualRect {
     horizontalSpeed: number;
     verticalSpeed: number;
     private speed: number;
+    private startX: number;
+    private startY: number;
 
-    constructor(x: number, y: number) {
-        super(x,y,24,64,"brown", "ghost");
+    constructor(col: number, row: number) {
+        const tileSize = 64;
+        const playerW = 3/8;
+        const playerH = 1;
+        const startX = col * tileSize + (tileSize - playerW * tileSize)/2;
+        const startY = (row + 1) * tileSize - playerH * tileSize;
+        super(startX, startY, playerW * tileSize, playerH * tileSize,"brown", "ghost");
+        this.startX = startX;
+        this.startY = startY;
         this.isFalling = false;
         this.isJumping = false;
         this.isStanding = true;
@@ -95,6 +104,7 @@ export class Player extends VisualRect {
     }
 
     kill(){
+        this.moveTo(this.startX, this.startY);
         this.stopMoveRight();
         this.stopMoveLeft();
         if (!this.isStanding) this.lieDown();
