@@ -1,10 +1,11 @@
-import {Rect} from "./rect.ts";
 import type {Player} from "./player.ts";
+import {VisualRect} from "./visualRect.ts";
+import type {Tile} from "./tile.ts";
 
 type coords = [number, number];
 
-export class ChasingEnemy extends Rect {
-    tiles: Rect[][];
+export class ChasingEnemy extends VisualRect {
+    tiles: Tile[][];
     player: Player;
     private startX: number;
     private startY: number;
@@ -24,7 +25,7 @@ export class ChasingEnemy extends Rect {
     setPlayer(player: Player): void {
         this.player = player;
     }
-    setTiles(tiles: Rect[][]): void {
+    setTiles(tiles: Tile[][]): void {
         this.tiles = tiles;
     }
 

@@ -2,6 +2,7 @@ import {type Level} from "./level.ts";
 import { Rect } from "./rect.ts";
 import {Player} from "./player.ts";
 import type {CollisionResponseHelper} from "./collisionResponse.ts";
+import {VisualRect} from "./visualRect.ts";
 
 export function applyPhysics(level: Level, collisionResponseHandler: CollisionResponseHelper): void {
     const player = level.player;
@@ -30,7 +31,6 @@ export function applyPhysics(level: Level, collisionResponseHandler: CollisionRe
 
     sweptAABB(player, level.getRectsWithoutLavaForCollision());
 
-    //getCollisionsAndResolve(level);
     if (checkGoal(level)) level.finish();
 }
 
@@ -127,7 +127,7 @@ function findRectWithSmallestMTV(rects: Rect[], player:Player): Rect {
 }
 
 function isGrounded(player: Rect, level: Level): boolean{
-    const groundCheckRect = new Rect(player.x, player.y + player.h, player.w, 1, "transparent")
+    const groundCheckRect = new VisualRect(player.x, player.y + player.h, player.w, 1, "transparent")
     for (const rect of level.getRectsWithoutLavaForCollision()) {
         if (checkCollision(rect, groundCheckRect)){
             return true;
@@ -137,7 +137,7 @@ function isGrounded(player: Rect, level: Level): boolean{
 }
 
 function isHittingCeiling(player: Rect, level: Level): boolean {
-    const ceilingCheckRect = new Rect(player.x, player.y-1, player.w, 1, "transparent")
+    const ceilingCheckRect = new VisualRect(player.x, player.y-1, player.w, 1, "transparent")
     for (const rect of level.getRectsWithoutLavaForCollision()) {
         if (checkCollision(rect, ceilingCheckRect)){
             return true;

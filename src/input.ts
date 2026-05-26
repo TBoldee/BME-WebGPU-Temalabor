@@ -1,5 +1,4 @@
 import {Level} from "./level.ts";
-import {getCollisionsAndResolve} from "./physics.ts";
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 let currentLevel: Level = Level.getCurrentLevel();
@@ -12,7 +11,6 @@ canvas.addEventListener('mousedown', (event) => {
         let x = event.clientX - rect.left;
         let y = event.clientY - rect.top;
         currentLevel.player.moveTo(x, y);
-        getCollisionsAndResolve(currentLevel);
         console.log(`Clicked: ${x} : ${y}`);
     }
 })

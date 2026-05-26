@@ -1,5 +1,5 @@
-import {Rect} from "./rect.ts";
 import {Projectile} from "./projectile.ts";
+import {VisualRect} from "./visualRect.ts";
 
 type enemyProps = {
     x: number,
@@ -14,7 +14,7 @@ type enemyProps = {
     shootingDelay?: number,
 }
 
-export class Enemy extends Rect {
+export class Enemy extends VisualRect {
     startX: number;
     startY: number;
     endX: number;

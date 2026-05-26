@@ -1,7 +1,8 @@
 import {Rect} from "./rect.ts";
 import {getCollidedRects} from "./physics.ts";
+import {VisualRect} from "./visualRect.ts";
 
-export class Player extends Rect {
+export class Player extends VisualRect {
     isFalling: boolean;
     isJumping: boolean;
     isStanding: boolean;

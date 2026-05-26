@@ -1,6 +1,6 @@
-import {Rect} from "./rect.ts";
+import {VisualRect} from "./visualRect.ts";
 
-export class Projectile extends Rect {
+export class Projectile extends VisualRect {
     horizontalSpeed: number;
     verticalSpeed: number;
 

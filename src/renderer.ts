@@ -4,7 +4,6 @@ import texturedFragWGSL from '../shaders/textured_quad_frag.wgsl?raw';
 import texturedQuadVertWGSL from '../shaders/textured_quad_vert.wgsl?raw';
 import { quitIfWebGPUNotAvailableOrMissingFeatures } from '../util/util.ts';
 import { Level } from "./level.ts";
-import type { Rect } from "./rect.ts";
 import lavaUrl from './images/lava.png';
 import doorUrl from './images/door.png';
 import ghostUrl from './images/ghost.png';
@@ -18,6 +17,7 @@ import grassAtlasUrl from './images/grassatlas.png'
 import graveUrl from './images/grave.png'
 import spikeUrl from './images/spike.png';
 import beholderUrl from './images/beholder.png'
+import type {VisualRect} from "./visualRect.ts";
 
 type textureProps = {
     url: string;
@@ -258,11 +258,11 @@ export class Renderer {
         canvas.height = canvas.clientHeight;
     }
 
-    rebuildStaticBuffers(rects: Rect[]) {
+    rebuildStaticBuffers(rects: VisualRect[]) {
         const sw = this.canvas.width;
         const sh = this.canvas.height;
-        let texturedRects: Rect[] = rects.filter(r => r.texture);
-        let coloredRects: Rect[] = rects.filter(r => !r.texture);
+        let texturedRects: VisualRect[] = rects.filter(r => r.texture);
+        let coloredRects: VisualRect[] = rects.filter(r => !r.texture);
 
         this.staticTexturedVertexData = new Float32Array(texturedRects.length * texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex);
         this.staticColoredVertexData = new Float32Array(coloredRects.length * coloredLayout.verts_per_quad * coloredLayout.floats_per_vertex);
@@ -284,7 +284,7 @@ export class Renderer {
         this.staticTexturedVertexBuffer = this.rebuildBuffer(this.staticTexturedVertexData, "staticTexturedVertexBuffer");
     }
 
-    rebuildDynamicTexturedBuffers(rects: Rect[]) {
+    rebuildDynamicTexturedBuffers(rects: VisualRect[]) {
         this.calculateDynamicTexturedData(rects);
         this.dynamicTexturedVertexBuffer = this.rebuildBuffer(this.dynamicTexturedVertexData, "dynamicTexturedVertexBuffer");
     }
@@ -304,7 +304,7 @@ export class Renderer {
         this.device.queue.writeBuffer(buffer, 0, data as Float32Array<ArrayBuffer>);
     }
 
-    calculateDynamicTexturedData(rects: Rect[]) {
+    calculateDynamicTexturedData(rects: VisualRect[]) {
         const sw = this.canvas.width;
         const sh = this.canvas.height;
 
@@ -319,8 +319,8 @@ export class Renderer {
     }
 
     async render(level: Level): Promise<void> {
-        let staticRects: Rect[] = level.getStaticRectsToRender();
-        let dynamicRects: Rect[] = level.getDynamicRectsToRender();
+        let staticRects: VisualRect[] = level.getStaticRectsToRender();
+        let dynamicRects: VisualRect[] = level.getDynamicRectsToRender();
 
         if(Level.levelChanged){
             this.rebuildStaticBuffers(staticRects);
@@ -342,7 +342,7 @@ export class Renderer {
         let staticTexturedOffset = 0;
         let staticColoredOffset = 0;
         for (let i = 0; i < staticRects.length; i++) {
-            const rect: Rect = staticRects[i];
+            const rect: VisualRect = staticRects[i];
             if (rect.texture) {
                 passEncoder.setPipeline(this.texturedPipeline);
                 passEncoder.setBindGroup(0, this.getBindGroupForTexture(rect.texture!));
@@ -359,7 +359,7 @@ export class Renderer {
         passEncoder.setPipeline(this.texturedPipeline);
         let dynamicTexturedOffset = 0;
         for (let i = 0; i < dynamicRects.length; i++) {
-            const rect: Rect = dynamicRects[i];
+            const rect: VisualRect = dynamicRects[i];
 
             passEncoder.setBindGroup(0, this.getBindGroupForTexture(rect.texture!));
             passEncoder.setVertexBuffer(0, this.dynamicTexturedVertexBuffer, dynamicTexturedOffset);
