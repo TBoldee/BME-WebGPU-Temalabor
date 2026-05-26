@@ -18,20 +18,11 @@ export function applyPhysics(level: Level, collisionResponseHandler: CollisionRe
         player.verticalSpeed = 0;
         player.isJumping = false;
     }
-    for (const enemy of level.enemies) {
-        enemy.tick();
-        for (const bullet of enemy.bullets) {
-            bullet.applySpeed();
-            if (getCollidedRects(level.getRectsForCollision(), bullet).length) enemy.bullets = enemy.bullets.filter(b => b !== bullet);
-        }
-    }
-    for (const chaser of level.chasers) {
-        chaser.tick();
+    for (const bullet of level.projectiles) {
+        if (getCollidedRects(level.getRectsForCollision(), bullet).length) level.projectiles = level.projectiles.filter(b => b !== bullet);
     }
 
     sweptAABB(player, level.getRectsWithoutLavaForCollision());
-
-    if (checkGoal(level)) level.finish();
 }
 
 export function getCollisionsAndResolve(level: Level): void {

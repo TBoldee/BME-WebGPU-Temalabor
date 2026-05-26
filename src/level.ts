@@ -6,11 +6,14 @@ import {ChasingEnemy} from "./chasingEnemy.ts";
 import {Tile} from "./tile.ts";
 import {Goal} from "./goal.ts";
 import {VisualRect} from "./visualRect.ts";
+import {Projectile} from "./projectile.ts";
+import {checkGoal} from "./physics.ts";
 
 export class Level {
     tiles: Tile[][];
     lava: Lava[];
-    enemies: PatrolEnemy[];
+    patrolEnemies: PatrolEnemy[];
+    projectiles: Projectile[];
     chasers: ChasingEnemy[];
     goal: Goal;
     player: Player;
@@ -27,6 +30,7 @@ export class Level {
         for (let i = 0; i < 14; i++) {this.tiles.push([]);}
         this.chasers = [];
         this.lava = [];
+        this.projectiles = [];
 
         let tileStringArray = layoutString.match(/\S/g) ?? [];
 
@@ -65,7 +69,10 @@ export class Level {
             if (col === 13) this.tiles[row].push(new Tile(col, row, w, h, "transparent")) //Blocker tile on right side
         }
         this.setTileVariants();
-        this.enemies = enemies;
+        this.patrolEnemies = enemies;
+        for (const enemy of this.patrolEnemies) {
+            enemy.setLevel(this)
+        }
         for (const chaser of this.chasers) {
             chaser.setTiles(this.tiles);
             chaser.setPlayer(this.player);
@@ -79,7 +86,6 @@ export class Level {
     }
 
     finish(){
-        this.enemies.forEach(enemy => enemy.clearTimer());
         if (levels.length > Level.currentLevelIndex + 1) {
             levels[++Level.currentLevelIndex].start();
         } else Level.hasWon = true;
@@ -87,21 +93,38 @@ export class Level {
 
     start() {
         this.player.kill()
-        this.enemies.forEach(enemy => enemy.reset());
+        this.patrolEnemies.forEach(enemy => enemy.reset());
         this.chasers.forEach(chaser => chaser.reset());
+        this.projectiles = [];
         Level.levelChanged = true;
     }
 
     static restartGame(){
-        console.log("Restarting game...");
         Level.currentLevelIndex = 0;
-        for (const level of levels) {
-            level.player.kill();
-            level.start();
-            level.enemies.forEach(enemy => enemy.clearTimer());
-        }
         this.hasWon = false;
         levels[Level.currentLevelIndex].start();
+    }
+
+    tick(): void {
+        if (checkGoal(this)) this.finish()
+        for (const patrolEnemy of this.patrolEnemies) {
+            patrolEnemy.tick();
+        }
+        for (const chaser of this.chasers) {
+            chaser.tick();
+        }
+    }
+
+    physicsUpdate(): void{
+        for (const patrolEnemy of this.patrolEnemies) {
+            patrolEnemy.moveTowardsGoal();
+        }
+        for (const chaser of this.chasers) {
+            chaser.moveTowardsGoal();
+        }
+        for (const projectile of this.projectiles) {
+            projectile.applySpeed()
+        }
     }
 
     getStaticRectsToRender(): VisualRect[] {
@@ -116,9 +139,9 @@ export class Level {
     getDynamicRectsToRender(): VisualRect[] {
         let rects: VisualRect[] = [];
         rects.push(this.player);
-        rects.push(...this.enemies);
+        rects.push(...this.patrolEnemies);
         rects.push(...this.chasers);
-        rects.push(...this.getProjectiles())
+        rects.push(...this.projectiles)
         return rects;
     }
 
@@ -135,17 +158,9 @@ export class Level {
         return rects;
     }
 
-    getProjectiles(): VisualRect [] {
-        let projectiles: VisualRect [] = [];
-        for (const enemy of this.enemies) {
-            projectiles.push(...enemy.bullets)
-        }
-        return projectiles;
-    }
-
     getHazards(): Rect[]{
         let hazards: Rect[] = [];
-        hazards.push(...this.lava, ...this.enemies, ...this.getProjectiles(), ...this.chasers);
+        hazards.push(...this.lava, ...this.patrolEnemies, ...this.projectiles, ...this.chasers);
         return hazards;
     }
 
@@ -160,6 +175,10 @@ export class Level {
             player.kill()
             this.start()
         }
+    }
+
+    spawnProjectile(x: number, y: number, w: number, h: number, horSpeed: number, vertSpeed: number): void {
+        this.projectiles.push(new Projectile(x, y, w, h, horSpeed, vertSpeed))
     }
 
     private setTileVariants(): void {

@@ -1,5 +1,5 @@
-import {Projectile} from "./projectile.ts";
 import {Enemy} from "./enemy.ts";
+import type {Level} from "./level.ts";
 
 type enemyProps = {
     startCol: number,
@@ -19,11 +19,11 @@ export class PatrolEnemy extends Enemy {
     verticalSpeed: number;
     patrolDuration: number;
     direction: "forward" | "backward";
-    bullets: Projectile[];
     shootingDirection: "none" | "left" | "right" | "up" | "down";
     shootingInterval: number;
     private tickSinceLastShot: number;
     private shootingDelay: number;
+    private level: Level;
 
     constructor({startCol, startRow, endCol, endRow, patrolDuration = 1, shootingDirection = "none", shootingInterval = 0, shootingDelay = 0}: enemyProps) {
         super(startCol, startRow, 1, 1, "red", "demon", (startCol <= endCol) ? "right" : "left");
@@ -35,7 +35,6 @@ export class PatrolEnemy extends Enemy {
         this.horizontalSpeed = (endCol - startCol) / patrolDuration;
         this.verticalSpeed = (endRow - startRow) / patrolDuration;
         this.direction = "forward";
-        this.bullets = [];
         this.shootingDirection = shootingDirection;
         this.shootingInterval = shootingInterval;
         this.tickSinceLastShot = -shootingDelay;
@@ -43,7 +42,6 @@ export class PatrolEnemy extends Enemy {
     }
 
     tick(): void{
-        this.moveTowardsGoal()
         if (this.tickSinceLastShot >= this.shootingInterval){
             this.shoot()
             this.clearTimer()
@@ -84,11 +82,14 @@ export class PatrolEnemy extends Enemy {
         this.verticalSpeed = (this.endY - this.startY) / this.patrolDuration;
         this.moveTo(this.startX, this.startY);
         this.tickSinceLastShot = -this.shootingDelay;
-        this.bullets = [];
     }
 
     clearTimer(){
         this.tickSinceLastShot = 0;
+    }
+
+    setLevel(level: Level){
+        this.level = level;
     }
 
     shoot(){
@@ -115,6 +116,6 @@ export class PatrolEnemy extends Enemy {
             projectileY = this.y + this.h;
             vSpeed = 5;
         }
-        this.bullets.push(new Projectile(projectileX, projectileY, projectileW, projectileH, hSpeed, vSpeed));
+        this.level.spawnProjectile(projectileX, projectileY, projectileW, projectileH, hSpeed, vSpeed);
     }
 }

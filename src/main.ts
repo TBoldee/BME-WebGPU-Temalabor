@@ -23,6 +23,8 @@ async function frame(currentTime: number) {
         timeAccumulator += delta;
         while (timeAccumulator >= timeStep) {
             applyPressedKeys()
+            currentLevel.tick()
+            currentLevel.physicsUpdate()
             applyPhysics(currentLevel, responseFunction);
             currentLevel.killPlayerIfOOB()
             timeAccumulator -= timeStep;

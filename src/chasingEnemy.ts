@@ -36,10 +36,10 @@ export class ChasingEnemy extends Enemy {
             this.currentGoal = [(path[0][1]-1) * tileSize, path[0][0] * tileSize];
             this.setSpeedForGoal()
         }
-        this.moveTowardsGoal()
     }
 
     moveTowardsGoal(): void{
+        if (!this.currentGoal) return;
         if (this.horizontalSpeed < 0){
             if (this.x + this.horizontalSpeed <= this.currentGoal[0]) {
                 this.moveTo(this.currentGoal[0], this.y)
