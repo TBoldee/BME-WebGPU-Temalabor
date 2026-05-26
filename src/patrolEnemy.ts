@@ -13,14 +13,12 @@ type enemyProps = {
 }
 
 export class PatrolEnemy extends Enemy {
-    endX: number;
-    endY: number;
-    horizontalSpeed: number;
-    verticalSpeed: number;
-    patrolDuration: number;
-    direction: "forward" | "backward";
-    shootingDirection: "none" | "left" | "right" | "up" | "down";
-    shootingInterval: number;
+    private endX: number;
+    private endY: number;
+    private patrolDuration: number;
+    private direction: "forward" | "backward";
+    private shootingDirection: "none" | "left" | "right" | "up" | "down";
+    private shootingInterval: number;
     private tickSinceLastShot: number;
     private shootingDelay: number;
     private level: Level;

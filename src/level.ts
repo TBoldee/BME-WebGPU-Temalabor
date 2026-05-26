@@ -10,19 +10,19 @@ import {Projectile} from "./projectile.ts";
 import {Physics} from "./physics.ts";
 
 export class Level {
-    tiles: Tile[][];
-    lava: Lava[];
-    patrolEnemies: PatrolEnemy[];
+    private tiles: Tile[][];
+    private lava: Lava[];
+    private patrolEnemies: PatrolEnemy[];
     projectiles: Projectile[];
-    chasers: ChasingEnemy[];
+    private chasers: ChasingEnemy[];
     goal: Goal;
     player: Player;
-    background: VisualRect;
+    private background: VisualRect;
     gravity: number;
     static hasWon: boolean = false;
-    static currentLevelIndex: number = 0;
+    private static currentLevelIndex: number = 0;
     static levelChanged: boolean = false;
-    static levels: Level[] = [];
+    private static levels: Level[] = [];
 
     constructor(layoutString: string, enemies: PatrolEnemy[], backgroundColor: string, gravity: number = 2) {
         const w = 1;

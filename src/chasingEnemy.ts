@@ -5,11 +5,9 @@ import {Enemy} from "./enemy.ts";
 type coords = [number, number];
 
 export class ChasingEnemy extends Enemy {
-    tiles: Tile[][];
-    player: Player;
+    private tiles: Tile[][];
+    private player: Player;
     private currentGoal: coords;
-    private horizontalSpeed: number;
-    private verticalSpeed: number;
 
     constructor(col: number, row: number) {
         super(col * 64, row * 64, 1, 1, "red", "beholder");
