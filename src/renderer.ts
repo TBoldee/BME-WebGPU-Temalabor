@@ -26,7 +26,7 @@ type textureProps = {
     tilingY: number;
 }
 const textureURLs:textureProps[] = [
-    {url: bricksAtlasUrl, name: "bricksAtlas", tilingX: 64, tilingY: 64},
+    {url: bricksAtlasUrl, name: "bricks", tilingX: 64, tilingY: 64},
     {url: lavaUrl, name: "lava", tilingX:64, tilingY: 64},
     {url: doorUrl, name: "door", tilingX:32, tilingY: 64},
     {url: ghostUrl, name: "ghost", tilingX:24, tilingY: 64},
@@ -35,7 +35,7 @@ const textureURLs:textureProps[] = [
     {url: demonUrl, name: "demon", tilingX: 64, tilingY: 64},
     {url: cageUrl, name: "cage", tilingX: 64, tilingY: 64},
     {url: energyballUrl, name: "ball", tilingX: 32, tilingY: 32},
-    {url: grassAtlasUrl, name: "grassAtlas", tilingX: 64, tilingY: 64},
+    {url: grassAtlasUrl, name: "grass", tilingX: 64, tilingY: 64},
     {url: graveUrl, name: "grave", tilingX:32, tilingY: 64},
     {url: spikeUrl, name: "spike", tilingX: 64, tilingY: 64},
     {url: beholderUrl, name: "beholder", tilingX: 64, tilingY: 64},
@@ -165,7 +165,7 @@ export class Renderer {
     private texturedPipeline: GPURenderPipeline;
     private coloredPipeline: GPURenderPipeline;
     private canvas: HTMLCanvasElement;
-    private bindGroups: GPUBindGroup[];
+    private bindGroupMap: Map<string, GPUBindGroup>;
     private staticTexturedVertexBuffer: GPUBuffer
     private staticColoredVertexBuffer: GPUBuffer
     private dynamicTexturedVertexBuffer: GPUBuffer
@@ -180,7 +180,7 @@ export class Renderer {
         texturedPipeline: GPURenderPipeline,
         coloredPipeline: GPURenderPipeline,
         canvas: HTMLCanvasElement,
-        bindGroups: GPUBindGroup[],
+        bindGroupMap: Map<string, GPUBindGroup>,
         indexBuffer: GPUBuffer,
     ) {
         this.device = device;
@@ -188,7 +188,7 @@ export class Renderer {
         this.texturedPipeline = texturedPipeline;
         this.coloredPipeline = coloredPipeline;
         this.canvas = canvas;
-        this.bindGroups = bindGroups;
+        this.bindGroupMap = bindGroupMap;
         this.indexBuffer = indexBuffer;
     }
 
@@ -218,7 +218,7 @@ export class Renderer {
             minFilter: 'linear',
         });
 
-        const bindGroups: GPUBindGroup[] = [];
+        const bindGroupMap: Map<string, GPUBindGroup> = new Map();
         for (const txtr of textureURLs) {
             const source = await Renderer.loadImageBitmap(txtr.url);
             const texture = device.createTexture({
@@ -236,18 +236,17 @@ export class Renderer {
                 { width: source.width, height: source.height },
             );
 
-            bindGroups.push(
-                device.createBindGroup({
-                    layout: texturedPipeline.getBindGroupLayout(0),
-                    entries: [
-                        { binding: 0, resource: sampler },
-                        { binding: 1, resource: texture.createView() },
-                    ]
-                })
-            );
+            const bindGroup = device.createBindGroup({
+                layout: texturedPipeline.getBindGroupLayout(0),
+                entries: [
+                    { binding: 0, resource: sampler },
+                    { binding: 1, resource: texture.createView() },
+                ]
+            });
+            bindGroupMap.set(txtr.name, bindGroup);
         }
 
-        const renderer = new Renderer(device, context, texturedPipeline, coloredPipeline, canvas, bindGroups, indexBuffer);
+        const renderer = new Renderer(device, context, texturedPipeline, coloredPipeline, canvas, bindGroupMap, indexBuffer);
         renderer.resizeCanvas(canvas);
         new ResizeObserver(() => renderer.resizeCanvas(canvas)).observe(canvas);
         return renderer;
@@ -256,13 +255,14 @@ export class Renderer {
     private resizeCanvas(canvas: HTMLCanvasElement): void {
         canvas.width  = canvas.clientWidth;
         canvas.height = canvas.clientHeight;
+        Level.levelChanged = true;
     }
 
     rebuildStaticBuffers(rects: VisualRect[]) {
         const sw = this.canvas.width;
         const sh = this.canvas.height;
-        let texturedRects: VisualRect[] = rects.filter(r => r.texture);
-        let coloredRects: VisualRect[] = rects.filter(r => !r.texture);
+        const texturedRects: VisualRect[] = rects.filter(r => r.texture);
+        const coloredRects: VisualRect[] = rects.filter(r => !r.texture);
 
         this.staticTexturedVertexData = new Float32Array(texturedRects.length * texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex);
         this.staticColoredVertexData = new Float32Array(coloredRects.length * coloredLayout.verts_per_quad * coloredLayout.floats_per_vertex);
@@ -290,8 +290,7 @@ export class Renderer {
     }
 
     rebuildBuffer(vertexData: Float32Array, label: string): GPUBuffer {
-        let vertexBuffer: GPUBuffer;
-        vertexBuffer = this.device.createBuffer({
+        let vertexBuffer: GPUBuffer= this.device.createBuffer({
             label: label,
             size:  vertexData.byteLength,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
@@ -318,9 +317,9 @@ export class Renderer {
         }
     }
 
-    async render(level: Level): Promise<void> {
-        let staticRects: VisualRect[] = level.getStaticRectsToRender();
-        let dynamicRects: VisualRect[] = level.getDynamicRectsToRender();
+    render(level: Level): void {
+        const staticRects: VisualRect[] = level.getStaticRectsToRender();
+        const dynamicRects: VisualRect[] = level.getDynamicRectsToRender();
 
         if(Level.levelChanged){
             this.rebuildStaticBuffers(staticRects);
@@ -380,35 +379,10 @@ export class Renderer {
         return await createImageBitmap(blob, { colorSpaceConversion: 'none' });
     }
 
-    private getBindGroupForTexture(texture: string): GPUBindGroup{
-        switch (texture) {
-            case "bricks":
-                return this.bindGroups[0];
-            case "lava":
-                return this.bindGroups[1];
-            case "door":
-                return this.bindGroups[2];
-            case "ghost":
-                return this.bindGroups[3];
-            case "ghostLying":
-                return this.bindGroups[4];
-            case "bones":
-                return this.bindGroups[5];
-            case "demon":
-                return this.bindGroups[6];
-            case "cage":
-                return this.bindGroups[7];
-            case "ball":
-                return this.bindGroups[8];
-            case "grass":
-                return this.bindGroups[9];
-            case "grave":
-                return this.bindGroups[10];
-            case "spike":
-                return this.bindGroups[11];
-            case "beholder":
-                return this.bindGroups[12];
-        }
+    private getBindGroupForTexture(texture: string): GPUBindGroup {
+        const bg = this.bindGroupMap.get(texture);
+        if (!bg) console.warn(`No bind group found for texture: "${texture}"`);
+        return bg;
     }
 
     private static createPipelineFromLayout (device: GPUDevice, vertShader: string, fragmentShader: string, vertexBufferStride: number, attributes: Iterable<GPUVertexAttribute>, label: string)

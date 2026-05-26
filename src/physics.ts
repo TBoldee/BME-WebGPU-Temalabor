@@ -26,17 +26,6 @@ export class Physics {
         Physics.sweptAABB(player, level.getRectsWithoutLavaForCollision());
     }
 
-    static getCollisionsAndResolve(level: Level): void {
-        const player = level.player;
-        let collidedRects = Physics.getCollidedRects(level.getRectsWithoutLavaForCollision(), player);
-        const maximumRecursions = 6;
-        let currentRecursions = 0;
-        while (collidedRects.length !== 0 && currentRecursions++ < maximumRecursions) {
-            Physics.resolveCollisions(collidedRects, player);
-            collidedRects = Physics.getCollidedRects(level.getRectsWithoutLavaForCollision(), player);
-        }
-    }
-
     static getCollidedRects(rects: Rect[], player: Rect): Rect[]{
         const collidedRects: Rect[] = [];
         for (const rect of rects) {
@@ -58,64 +47,6 @@ export class Physics {
     }
     private static collidesOnY(rect: Rect, player: Rect) {
         return !(player.y + player.h <= rect.y || player.y >= rect.y + rect.h);
-    }
-
-    private static resolveCollisions(collidedRects: Rect[], player: Player): void {
-        const smallestMTVRect = Physics.findRectWithSmallestMTV(collidedRects, player);
-        const [MTVX, MTVY] = Physics.calculateMinimumTranslationVector(smallestMTVRect, player);
-
-        if (MTVY <= MTVX || (player.isFalling && player.horizontalSpeed === 0))  { //prefer vertical resolution if player is falling and not moving
-            let dir = Physics.calculateMoveDirection(smallestMTVRect, player, "y");
-            player.move(0, MTVY);
-        } else if (MTVX < MTVY) {
-            let dir = Physics.calculateMoveDirection(smallestMTVRect, player, "x");
-            dir === 1 ? player.stopMoveLeft() : player.stopMoveRight();
-            player.move(MTVX,0);
-        }
-    }
-
-    private static calculateMinimumTranslationVector(rect: Rect, player: Player): [number,number] {
-        let xDistance: number;
-        let [rectCenterX, rectCenterY] = rect.getCenter();
-        let [playerCenterX, playerCenterY] = player.getCenter();
-        if (playerCenterX <= rectCenterX){
-            xDistance = rect.x - (player.x + player.w);
-        } else {
-            xDistance = rect.x + rect.w - player.x;
-        }
-
-        let yDistance: number;
-        if (playerCenterY <= rectCenterY){
-            yDistance = rect.y - (player.y + player.h);
-        } else {
-            yDistance = rect.y + rect.h - player.y;
-        }
-        return [xDistance, yDistance];
-    }
-
-    private static calculateMoveDirection(rect: Rect, player: Player, axis: "x" | "y"): -1 | 1 {
-        const [rectCenterX, rectCenterY] = rect.getCenter();
-        const [playerCenterX, playerCenterY] = player.getCenter();
-        if (axis === "x"){
-            if (playerCenterX < rectCenterX) return -1;
-            else return 1;
-        } else if (axis === "y"){
-            if (playerCenterY < rectCenterY) return -1;
-            else return 1;
-        }
-    }
-
-    private static findRectWithSmallestMTV(rects: Rect[], player:Player): Rect {
-        let smallest: Rect = rects[0];
-        let [smallestMTVX, smallestMTVY] = Physics.calculateMinimumTranslationVector(smallest, player);
-        for (const rect of rects) {
-            let [rectMTVX, rectMTVY] = Physics.calculateMinimumTranslationVector(rect, player)
-            if (Math.min(rectMTVX, rectMTVY) < Math.min(smallestMTVX, smallestMTVY)){
-                smallest = rect;
-                [smallestMTVX, smallestMTVY] = [rectMTVX, rectMTVY];
-            }
-        }
-        return smallest;
     }
 
     static checkGoal(level: Level){
