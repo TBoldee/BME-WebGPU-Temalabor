@@ -1,7 +1,7 @@
 import {Player} from "./player.ts";
 import {Rect} from "./rect.ts";
 import {Lava, Spike} from "./lava.ts";
-import {Enemy} from "./enemy.ts"
+import {PatrolEnemy} from "./patrolEnemy.ts"
 import {ChasingEnemy} from "./chasingEnemy.ts";
 import {Tile} from "./tile.ts";
 import {Goal} from "./goal.ts";
@@ -10,7 +10,7 @@ import {VisualRect} from "./visualRect.ts";
 export class Level {
     tiles: Tile[][];
     lava: Lava[];
-    enemies: Enemy[];
+    enemies: PatrolEnemy[];
     chasers: ChasingEnemy[];
     goal: Goal;
     player: Player;
@@ -22,7 +22,7 @@ export class Level {
     static currentLevelIndex: number = 0;
     static levelChanged: boolean = false;
 
-    constructor(layoutString: string, enemies: Enemy[], backgroundColor: string, gravity: number = 2) {
+    constructor(layoutString: string, enemies: PatrolEnemy[], backgroundColor: string, gravity: number = 2) {
         const w = 64;
         const h = 64;
         const doorW = 32;
@@ -40,7 +40,7 @@ export class Level {
             let str = tileStringArray[i];
             const row = Math.floor(i / 14);
             const col = i % 14;
-            const x = col * w;
+            const x = col * w; //TODO tile index
             const y = row * h;
             if (col === 0) this.tiles[row].push(new Tile(x - w,y,w,h, "transparent")) // Blocker tile on left side
             if (str === "_") {
@@ -274,7 +274,7 @@ const levelFour: Level = new Level (
     BBBBBBBBBBBBBB
     `,
     [
-        new Enemy({x: 1, y: 2, endX: 12, endY: 2, patrolDuration: 90, shootingDirection: "down", shootingInterval: 10})
+        new PatrolEnemy({startCol: 1, startRow: 2, endCol: 12, endRow: 2, patrolDuration: 90, shootingDirection: "down", shootingInterval: 10})
     ],
     "indigo"
 );
@@ -318,13 +318,13 @@ const levelSix: Level = new Level (
     BBLBBBBBBBBBBB
     `,
     [
-        new Enemy({x: 2, y: 3, endX: 2, endY: 12, patrolDuration: 120, shootingDirection: "none"}),
-        new Enemy({x: 2, y: 12, endX: 2, endY: 3, patrolDuration: 80, shootingDirection: "none"}),
-        new Enemy({x: 9, y: 5, endX: 12, endY: 5, patrolDuration: 40, shootingDirection: "none"}),
-        new Enemy({x: 9, y: 8, endX: 12, endY: 8, patrolDuration: 35, shootingDirection: "none"}),
-        new Enemy({x: 10, y: 7, endX: 12, endY: 11, patrolDuration: 45, shootingDirection: "none"}),
-        new Enemy({x: 9, y: 6, endX: 11, endY: 3, patrolDuration: 50, shootingDirection: "none"}),
-        new Enemy({x: 4, y: 8, endX: 4, endY: 8, shootingDirection: "right", shootingInterval: 30}),
+        new PatrolEnemy({startCol: 2, startRow: 3, endCol: 2, endRow: 12, patrolDuration: 120, shootingDirection: "none"}),
+        new PatrolEnemy({startCol: 2, startRow: 12, endCol: 2, endRow: 3, patrolDuration: 80, shootingDirection: "none"}),
+        new PatrolEnemy({startCol: 9, startRow: 5, endCol: 12, endRow: 5, patrolDuration: 40, shootingDirection: "none"}),
+        new PatrolEnemy({startCol: 9, startRow: 8, endCol: 12, endRow: 8, patrolDuration: 35, shootingDirection: "none"}),
+        new PatrolEnemy({startCol: 10, startRow: 7, endCol: 12, endRow: 11, patrolDuration: 45, shootingDirection: "none"}),
+        new PatrolEnemy({startCol: 9, startRow: 6, endCol: 11, endRow: 3, patrolDuration: 50, shootingDirection: "none"}),
+        new PatrolEnemy({startCol: 4, startRow: 8, endCol: 4, endRow: 8, shootingDirection: "right", shootingInterval: 30}),
     ],
     "indigo"
 )
@@ -368,11 +368,11 @@ const levelEight: Level = new Level(
     BBBBBBBBBBBBBB
     `,
     [
-        new Enemy({x: 4, y: 2, endX: 4, endY: 2, shootingDirection: "down", shootingInterval: 40}),
-        new Enemy({x: 8, y: 2, endX: 8, endY: 2, shootingDirection: "down", shootingInterval: 40}),
-        new Enemy({x: 0, y: 3, endX: 0, endY: 3, shootingDirection: "right", shootingInterval: 60, shootingDelay: 30}),
-        new Enemy({x: 0, y: 4, endX: 0, endY: 4, shootingDirection: "right", shootingInterval: 60}),
-        new Enemy({x: 13, y: 12, endX: 13, endY: 12, shootingDirection: "left", shootingInterval: 30}),
+        new PatrolEnemy({startCol: 4, startRow: 2, endCol: 4, endRow: 2, shootingDirection: "down", shootingInterval: 40}),
+        new PatrolEnemy({startCol: 8, startRow: 2, endCol: 8, endRow: 2, shootingDirection: "down", shootingInterval: 40}),
+        new PatrolEnemy({startCol: 0, startRow: 3, endCol: 0, endRow: 3, shootingDirection: "right", shootingInterval: 60, shootingDelay: 30}),
+        new PatrolEnemy({startCol: 0, startRow: 4, endCol: 0, endRow: 4, shootingDirection: "right", shootingInterval: 60}),
+        new PatrolEnemy({startCol: 13, startRow: 12, endCol: 13, endRow: 12, shootingDirection: "left", shootingInterval: 30}),
     ],
     "indigo"
 )
@@ -395,9 +395,9 @@ const levelNine: Level = new Level (
     BB__CC__C__BBB
     `,
     [
-        new Enemy({x: 13, y: 1.5, endX: 13, endY: 1.5, shootingDirection: "left", shootingInterval: 20}),
-        new Enemy({x: 0, y: 6, endX: 0, endY: 6, shootingDirection: "right", shootingInterval: 36}),
-        new Enemy({x: 13, y: 12, endX: 13, endY: 12, shootingDirection: "left", shootingInterval: 50}),
+        new PatrolEnemy({startCol: 13, startRow: 1.5, endCol: 13, endRow: 1.5, shootingDirection: "left", shootingInterval: 20}),
+        new PatrolEnemy({startCol: 0, startRow: 6, endCol: 0, endRow: 6, shootingDirection: "right", shootingInterval: 36}),
+        new PatrolEnemy({startCol: 13, startRow: 12, endCol: 13, endRow: 12, shootingDirection: "left", shootingInterval: 50}),
     ],
     "indigo"
 );

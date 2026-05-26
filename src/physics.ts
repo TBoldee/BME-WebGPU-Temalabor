@@ -26,7 +26,7 @@ export function applyPhysics(level: Level, collisionResponseHandler: CollisionRe
         }
     }
     for (const chaser of level.chasers) {
-        chaser.move();
+        chaser.tick();
     }
 
     sweptAABB(player, level.getRectsWithoutLavaForCollision());

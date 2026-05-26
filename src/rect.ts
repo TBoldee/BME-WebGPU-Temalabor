@@ -17,6 +17,11 @@ export abstract class Rect {
         this.y = Math.floor(y);
     }
 
+    moveToTile(col: number, row: number) {
+        const tileSize = 64;
+        this.moveTo(col * tileSize, row * tileSize);
+    }
+
     move(x: number, y: number) {
         this.x = this.x + x;
         this.y = this.y + y;
