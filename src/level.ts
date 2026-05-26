@@ -7,7 +7,7 @@ import {Tile} from "./tile.ts";
 import {Goal} from "./goal.ts";
 import {VisualRect} from "./visualRect.ts";
 import {Projectile} from "./projectile.ts";
-import {checkGoal} from "./physics.ts";
+import {Physics} from "./physics.ts";
 
 export class Level {
     tiles: Tile[][];
@@ -38,7 +38,7 @@ export class Level {
             let str = tileStringArray[i];
             const row = Math.floor(i / 14);
             const col = i % 14;
-            if (col === 0) this.tiles[row].push(new Tile(col, row, w, h, "transparent")) // Blocker tile on left side
+            if (col === 0) this.tiles[row].push(new Tile(col-1, row, w, h, "transparent")) // Blocker tile on left side
             if (str === "_") {
               this.tiles[row].push(new Tile(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
             } else if (str === "B"){
@@ -66,7 +66,7 @@ export class Level {
                 this.goal = new Goal(col, row, texture);
                 this.tiles[row].push(new Tile(0, 0, 0, 0, "transparent", undefined, "right", 0, false));
             }
-            if (col === 13) this.tiles[row].push(new Tile(col, row, w, h, "transparent")) //Blocker tile on right side
+            if (col === 13) this.tiles[row].push(new Tile(col+1, row, w, h, "transparent")) //Blocker tile on right side
         }
         this.setTileVariants();
         this.patrolEnemies = enemies;
@@ -106,7 +106,7 @@ export class Level {
     }
 
     tick(): void {
-        if (checkGoal(this)) this.finish()
+        if (Physics.checkGoal(this)) this.finish()
         for (const patrolEnemy of this.patrolEnemies) {
             patrolEnemy.tick();
         }

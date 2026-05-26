@@ -1,5 +1,5 @@
 import {Rect} from "./rect.ts";
-import {getCollidedRects} from "./physics.ts";
+import {Physics} from "./physics.ts";
 import {VisualRect} from "./visualRect.ts";
 
 export class Player extends VisualRect {
@@ -82,7 +82,7 @@ export class Player extends VisualRect {
     lieDownIfPossible(rects: Rect[]){
         if (this.isFalling) return;
         this.lieDown();
-        if (this.isStanding && getCollidedRects(rects, this).length !== 0) this.lieDown();
+        if (this.isStanding && Physics.getCollidedRects(rects, this).length !== 0) this.lieDown();
     }
 
     private lieDown(){

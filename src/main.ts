@@ -1,5 +1,5 @@
 import { Renderer } from './renderer.ts';
-import {applyPhysics} from "./physics.ts";
+import { Physics} from "./physics.ts";
 import './input.ts';
 import {Level} from "./level.ts";
 import {responseFunction} from "./collisionResponse.ts";
@@ -25,7 +25,7 @@ async function frame(currentTime: number) {
             applyPressedKeys()
             currentLevel.tick()
             currentLevel.physicsUpdate()
-            applyPhysics(currentLevel, responseFunction);
+            Physics.applyPhysics(currentLevel, responseFunction);
             currentLevel.killPlayerIfOOB()
             timeAccumulator -= timeStep;
         }
