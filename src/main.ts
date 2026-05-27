@@ -1,14 +1,13 @@
 import { Renderer } from './renderer.ts';
-import { Physics} from "./physics.ts";
 import './input.ts';
 import {Level} from "./level.ts";
-import {responseFunction} from "./collisionResponse.ts";
-import {applyPressedKeys} from "./input.ts";
+import {Input} from "./input.ts";
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 const renderer = await Renderer.init(canvas);
 Level.init()
 let currentLevel: Level = Level.getCurrentLevel();
+Input.init();
 currentLevel.start();
 const timeStep = 1000 / 60;
 let lastTime = 0;
@@ -23,10 +22,9 @@ async function frame(currentTime: number) {
         const delta = Math.min(currentTime - lastTime, 250);
         timeAccumulator += delta;
         while (timeAccumulator >= timeStep) {
-            applyPressedKeys()
+            Input.applyPressedKeys()
             currentLevel.tick()
             currentLevel.physicsUpdate()
-            Physics.applyPhysics(currentLevel, responseFunction);
             currentLevel.killPlayerIfOOB()
             timeAccumulator -= timeStep;
         }
@@ -34,7 +32,7 @@ async function frame(currentTime: number) {
 
     lastTime = currentTime;
 
-    currentLevel = Level.getCurrentLevel();
+    if (Level.levelChanged) currentLevel = Level.getCurrentLevel();
     try {
         renderer.render(currentLevel);
     } catch (e) {

@@ -8,6 +8,7 @@ import {Goal} from "./goal.ts";
 import {VisualRect} from "./visualRect.ts";
 import {Projectile} from "./projectile.ts";
 import {Physics} from "./physics.ts";
+import {responseFunction} from "./collisionResponse.ts";
 
 export class Level {
     private tiles: Tile[][];
@@ -126,6 +127,7 @@ export class Level {
         for (const projectile of this.projectiles) {
             projectile.applySpeed()
         }
+        Physics.applyPhysics(this, responseFunction);
     }
 
     getStaticRectsToRender(): VisualRect[] {

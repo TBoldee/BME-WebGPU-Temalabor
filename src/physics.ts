@@ -129,6 +129,7 @@ export class Physics {
     }
 
     private static sweptAABB(player: Player, rects: Rect[]): void {
+        Physics.depenetrate(rects, player);
         // Horizontal pass
         const savedVertical = player.verticalSpeed;
         player.verticalSpeed = 0;
@@ -177,6 +178,37 @@ export class Physics {
         }
         else if (x === 1) {
             player.stopMoveLeft();
+        }
+    }
+
+    private static calculateMinimumTranslationVector(rect: Rect, player: Player): [number,number] {
+        let xDistance: number;
+        let [rectCenterX, rectCenterY] = rect.getCenter();
+        let [playerCenterX, playerCenterY] = player.getCenter();
+        if (playerCenterX <= rectCenterX){
+            xDistance = rect.x - (player.x + player.w);
+        } else {
+            xDistance = rect.x + rect.w - player.x;
+        }
+
+        let yDistance: number;
+        if (playerCenterY <= rectCenterY){
+            yDistance = rect.y - (player.y + player.h);
+        } else {
+            yDistance = rect.y + rect.h - player.y;
+        }
+        return [xDistance, yDistance];
+    }
+
+    private static depenetrate(rects: Rect[], player: Player){
+        for (const rect of rects) {
+            if (!Physics.checkCollision(rect, player)) continue;
+            const [MTVX, MTVY] = Physics.calculateMinimumTranslationVector(rect, player);
+            if (Math.abs(MTVX) <= Math.abs(MTVY)) {
+                player.move(MTVX, 0);
+            } else {
+                player.move(0, MTVY);
+            }
         }
     }
 }
