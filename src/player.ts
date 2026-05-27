@@ -1,0 +1,121 @@
+import {Rect} from "./rect.ts";
+import {Physics} from "./physics.ts";
+import {VisualRect} from "./visualRect.ts";
+
+export class Player extends VisualRect {
+    isFalling: boolean;
+    isJumping: boolean;
+    isStanding: boolean;
+    isMovingLeft: boolean;
+    isMovingRight: boolean;
+    horizontalSpeed: number;
+    verticalSpeed: number;
+    private speed: number;
+    private startX: number;
+    private startY: number;
+
+    constructor(col: number, row: number) {
+        const tileSize = 64;
+        const playerW = 3/8;
+        const playerH = 1;
+        const startX = col * tileSize + (tileSize - playerW * tileSize)/2;
+        const startY = (row + 1) * tileSize - playerH * tileSize;
+        super(startX, startY, playerW * tileSize, playerH * tileSize,"brown", "ghost");
+        this.startX = startX;
+        this.startY = startY;
+        this.isFalling = false;
+        this.isJumping = false;
+        this.isStanding = true;
+        this.horizontalSpeed = 0;
+        this.verticalSpeed = 0;
+        this.speed = 6;
+    }
+
+    applyGravity(g: number){
+        let gravity = Math.abs(g);
+        const terminalVelocity: number = Math.floor(this.h/2);
+        if (this.verticalSpeed == 0) {
+            this.verticalSpeed = gravity;
+            this.isJumping = false;
+        } else if (this.verticalSpeed < 0) {
+            const multiplier: number = 1 / (1 + (gravity / 10));
+            this.verticalSpeed *= multiplier;
+            if (this.verticalSpeed > -1.0) this.verticalSpeed = 0;
+        } else {
+            const multiplier: number = 1 + (gravity / 10);
+            this.verticalSpeed *= multiplier;
+            if (this.verticalSpeed > terminalVelocity) this.verticalSpeed = terminalVelocity;
+        }
+    }
+    applySpeed(){
+        this.x = Math.floor(this.x + this.horizontalSpeed);
+        this.y = Math.floor(this.y + this.verticalSpeed);
+    }
+
+    startMoveLeft(){
+        if (!this.isMovingLeft) {
+            this.isMovingLeft = true;
+            this.horizontalSpeed -= this.speed;
+            this.facing = "left";
+        }
+    }
+    stopMoveLeft(){
+        if (this.isMovingLeft) {
+            this.isMovingLeft = false;
+            this.horizontalSpeed += this.speed;
+        }
+    }
+    startMoveRight(){
+        if (!this.isMovingRight) {
+            this.isMovingRight = true;
+            this.horizontalSpeed += this.speed;
+            this.facing = "right";
+        }
+    }
+    stopMoveRight(){
+        if (this.isMovingRight) {
+            this.isMovingRight = false;
+            this.horizontalSpeed -= this.speed;
+        }
+    }
+
+    lieDownIfPossible(rects: Rect[]){
+        if (this.isFalling) return;
+        this.lieDown();
+        if (this.isStanding && Physics.getCollidedRects(rects, this).length !== 0) this.lieDown();
+    }
+
+    private lieDown(){
+        [this.w, this.h] = [this.h, this.w];
+        this.moveTo(this.x - (this.w - this.h) / 2, this.y + this.w - this.h);
+        if (this.isStanding) {
+            this.isStanding = false;
+            this.texture = "ghostLying";
+        } else {
+            this.isStanding = true;
+            this.texture = "ghost";
+        }
+    }
+
+    startJumping(): void {
+        if (this.isJumping || this.isFalling) return;
+        this.isJumping = true;
+        this.verticalSpeed = this.isStanding ? -30 : -15;
+    }
+
+    kill(){
+        this.moveTo(this.startX, this.startY);
+        this.stopMoveRight();
+        this.stopMoveLeft();
+        if (!this.isStanding) this.lieDown();
+        this.isFalling = false;
+        this.isJumping = false;
+        this.verticalSpeed = 0;
+        this.facing = "right";
+    }
+
+    move(x: number, y: number) {
+        this.x = Math.floor(this.x + x);
+        this.y = Math.floor(this.y + y);
+    }
+}
