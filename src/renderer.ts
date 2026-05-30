@@ -122,8 +122,8 @@ export class Renderer {
         const sampler = device.createSampler({
             addressModeU: 'repeat',
             addressModeV: 'repeat',
-            magFilter: 'linear',
-            minFilter: 'linear',
+            magFilter: 'nearest',
+            minFilter: 'nearest',
         });
 
         const bindGroupMap: Map<string, GPUBindGroup> = new Map();
@@ -134,8 +134,7 @@ export class Renderer {
                 format: 'rgba8unorm',
                 size: [source.width, source.height],
                 usage: GPUTextureUsage.TEXTURE_BINDING |
-                    GPUTextureUsage.COPY_DST |
-                    GPUTextureUsage.RENDER_ATTACHMENT,
+                    GPUTextureUsage.COPY_DST
             });
 
             device.queue.copyExternalImageToTexture(
