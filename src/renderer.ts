@@ -24,21 +24,22 @@ type textureProps = {
     name: string;
     tilingX: number;
     tilingY: number;
+    atlas: boolean;
 }
 const textureURLs:textureProps[] = [
-    {url: bricksAtlasUrl, name: "bricks", tilingX: 64, tilingY: 64},
-    {url: lavaUrl, name: "lava", tilingX:64, tilingY: 64},
-    {url: doorUrl, name: "door", tilingX:32, tilingY: 64},
-    {url: ghostUrl, name: "ghost", tilingX:24, tilingY: 64},
-    {url: ghostLyingUrl, name: "ghostLying", tilingX:64, tilingY: 24},
-    {url: bonesUrl, name: "bones", tilingX: 64, tilingY: 64},
-    {url: demonUrl, name: "demon", tilingX: 64, tilingY: 64},
-    {url: cageUrl, name: "cage", tilingX: 64, tilingY: 64},
-    {url: energyballUrl, name: "ball", tilingX: 32, tilingY: 32},
-    {url: grassAtlasUrl, name: "grass", tilingX: 64, tilingY: 64},
-    {url: graveUrl, name: "grave", tilingX:32, tilingY: 64},
-    {url: spikeUrl, name: "spike", tilingX: 64, tilingY: 64},
-    {url: beholderUrl, name: "beholder", tilingX: 64, tilingY: 64},
+    {url: bricksAtlasUrl, name: "bricks", tilingX: 64, tilingY: 64, atlas: true},
+    {url: lavaUrl, name: "lava", tilingX:64, tilingY: 64, atlas: false},
+    {url: doorUrl, name: "door", tilingX:32, tilingY: 64, atlas: false},
+    {url: ghostUrl, name: "ghost", tilingX:24, tilingY: 64, atlas: false},
+    {url: ghostLyingUrl, name: "ghostLying", tilingX:64, tilingY: 24, atlas: false},
+    {url: bonesUrl, name: "bones", tilingX: 64, tilingY: 64, atlas: false},
+    {url: demonUrl, name: "demon", tilingX: 64, tilingY: 64, atlas: false},
+    {url: cageUrl, name: "cage", tilingX: 64, tilingY: 64, atlas: false},
+    {url: energyballUrl, name: "ball", tilingX: 32, tilingY: 32, atlas: false},
+    {url: grassAtlasUrl, name: "grass", tilingX: 64, tilingY: 64, atlas: true},
+    {url: graveUrl, name: "grave", tilingX:32, tilingY: 64, atlas: false},
+    {url: spikeUrl, name: "spike", tilingX: 64, tilingY: 64, atlas: false},
+    {url: beholderUrl, name: "beholder", tilingX: 64, tilingY: 64, atlas: false},
 ];
 
 
@@ -49,8 +50,8 @@ const texturedLayout = {
     verts_per_quad: 4,
     indices_per_quad: 6,
     attributes: [
-        { shaderLocation: 0, offset: 0,     format: 'float32x2' }, // pos
-        { shaderLocation: 1, offset: 2 * 4, format: 'float32x2' }, // uv
+        { format: 'float32x2', shaderLocation: 0, offset: 0,      }, // pos
+        { format: 'float32x2', shaderLocation: 1, offset: 2 * 4,  }, // uv
     ] satisfies GPUVertexAttribute[],
 }
 
@@ -64,99 +65,6 @@ const coloredLayout = {
         { shaderLocation: 0, offset: 0,     format: 'float32x2' }, // pos
         { shaderLocation: 1, offset: 2 * 4, format: 'float32x4' }, // rgba
     ] satisfies GPUVertexAttribute[],
-}
-
-function getUVsFromVariant(variant: number){
-    switch (variant) {
-        case 0:
-            return [0, 0, 1/4, 1/4];
-        case 1:
-            return [0, 3/4, 1/4, 4/4];
-        case 2:
-            return [3/4, 3/4, 4/4, 4/4];
-        case 3:
-            return [3/4, 2/4, 4/4, 3/4];
-        case 4:
-            return [1/4, 3/4, 2/4, 4/4];
-        case 5:
-            return [1/4, 2/4, 2/4, 3/4];
-        case 6:
-            return [2/4, 3/4, 3/4, 4/4];
-        case 7:
-            return [2/4, 2/4, 3/4, 3/4];
-        case 8:
-            return [0, 1/4, 1/4, 2/4];
-        case 9:
-            return [0, 2/4, 1/4, 3/4];
-        case 10:
-            return [3/4, 0, 4/4, 1/4];
-        case 11:
-            return [3/4, 1/4, 4/4, 2/4];
-        case 12:
-            return [1/4, 0, 2/4, 1/4];
-        case 13:
-            return [1/4, 1/4, 2/4, 2/4];
-        case 14:
-            return [2/4, 0, 3/4, 1/4];
-        case 15:
-            return [2/4, 1/4, 3/4, 2/4];
-    }
-}
-
-function rectToVertices(
-    x: number, y: number, w: number, h: number, facing: "left" | "right",
-    sw: number, sh: number,
-    variant: number, color?: number[], texture?: string,
-): Float32Array {
-
-    const toNDC = (px: number, py: number): [number, number] => [
-        (px / sw) *  2 - 1,
-        (py / sh) * -2 + 1, //Y-axis in clip space is +1 at the top and -1 at bottom, while pixel position is 0 at top and grows downwards. Calculation needs to be inverted.
-    ];
-    const tl = toNDC(x,     y    );
-    const tr = toNDC(x + w, y    );
-    const br = toNDC(x + w, y + h);
-    const bl = toNDC(x,     y + h);
-
-    let vertexArray = new Float32Array([]);
-    let tilingX, tilingY, startU, startV, endU, endV, r, g, b, a;
-    if (texture) {
-        const textureProps = textureURLs.find(t => t.name === texture);
-        if (!texture.match(/brick|grass/)){
-            startU = 0;
-            startV = 0;
-            tilingX = textureProps.tilingX;
-            tilingY = textureProps.tilingY;
-            endU = w / tilingX;
-            endV = h / tilingY;
-        } else [startU, startV, endU, endV] = getUVsFromVariant(variant);
-        if (facing === "right"){
-            vertexArray = new Float32Array([
-                ...tl, startU,startV,
-                ...tr, endU,startV,
-                ...br, endU,endV,
-                ...bl, startU,endV,
-            ]);
-        } else if (facing === "left"){
-            vertexArray = new Float32Array([
-                ...tl, endU,startV,
-                ...tr, startU,startV,
-                ...br, startU,endV,
-                ...bl, endU,endV,
-            ]);
-        }
-
-    } else if (color){
-        [r,g,b,a] = color;
-        vertexArray = new Float32Array([
-            ...tl, r,g,b,a,
-            ...tr, r,g,b,a,
-            ...br, r,g,b,a,
-            ...bl, r,g,b,a,
-        ])
-    }
-
-    return vertexArray;
 }
 
 export class Renderer {
@@ -252,71 +160,6 @@ export class Renderer {
         return renderer;
     }
 
-    private resizeCanvas(canvas: HTMLCanvasElement): void {
-        canvas.width  = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
-        Level.levelChanged = true;
-    }
-
-    rebuildStaticBuffers(rects: VisualRect[]) {
-        const sw = this.canvas.width;
-        const sh = this.canvas.height;
-        const texturedRects: VisualRect[] = rects.filter(r => r.texture);
-        const coloredRects: VisualRect[] = rects.filter(r => !r.texture);
-
-        this.staticTexturedVertexData = new Float32Array(texturedRects.length * texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex);
-        this.staticColoredVertexData = new Float32Array(coloredRects.length * coloredLayout.verts_per_quad * coloredLayout.floats_per_vertex);
-
-        let texturedOffset = 0;
-        let coloredOffset = 0;
-        for (let i = 0; i < rects.length; i++) {
-            const { x, y, w, h, facing, color = [1, 1, 1, 1], texture, variant } = rects[i];
-            if (rects[i].texture){
-                this.staticTexturedVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, variant, color, texture), texturedOffset);
-                texturedOffset += texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex;
-            } else {
-                this.staticColoredVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, variant, color, texture), coloredOffset);
-                coloredOffset += coloredLayout.verts_per_quad * coloredLayout.floats_per_vertex;
-            }
-        }
-
-        this.staticColoredVertexBuffer = this.rebuildBuffer(this.staticColoredVertexData, "staticColoredVertexBuffer");
-        this.staticTexturedVertexBuffer = this.rebuildBuffer(this.staticTexturedVertexData, "staticTexturedVertexBuffer");
-    }
-
-    rebuildDynamicTexturedBuffers(rects: VisualRect[]) {
-        this.calculateDynamicTexturedData(rects);
-        this.dynamicTexturedVertexBuffer = this.rebuildBuffer(this.dynamicTexturedVertexData, "dynamicTexturedVertexBuffer");
-    }
-
-    rebuildBuffer(vertexData: Float32Array, label: string): GPUBuffer {
-        let vertexBuffer: GPUBuffer= this.device.createBuffer({
-            label: label,
-            size:  vertexData.byteLength,
-            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-        });
-        this.writeBuffer(vertexBuffer, vertexData as Float32Array<ArrayBuffer> );
-        return vertexBuffer;
-    }
-
-    writeBuffer(buffer: GPUBuffer, data: Float32Array): void {
-        this.device.queue.writeBuffer(buffer, 0, data as Float32Array<ArrayBuffer>);
-    }
-
-    calculateDynamicTexturedData(rects: VisualRect[]) {
-        const sw = this.canvas.width;
-        const sh = this.canvas.height;
-
-        this.dynamicTexturedVertexData = new Float32Array(rects.length * texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex);
-
-        let offset = 0;
-        for (let i = 0; i < rects.length; i++) {
-            const { x, y, w, h, facing, color = [1, 1, 1, 1], texture, variant } = rects[i];
-            this.dynamicTexturedVertexData.set(rectToVertices(x, y, w, h, facing, sw, sh, variant, color, texture), offset);
-            offset += texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex;
-        }
-    }
-
     render(level: Level): void {
         const staticRects: VisualRect[] = level.getStaticRectsToRender();
         const dynamicRects: VisualRect[] = level.getDynamicRectsToRender();
@@ -342,17 +185,20 @@ export class Renderer {
         let staticColoredOffset = 0;
         for (let i = 0; i < staticRects.length; i++) {
             const rect: VisualRect = staticRects[i];
+            let indexNum;
             if (rect.texture) {
                 passEncoder.setPipeline(this.texturedPipeline);
                 passEncoder.setBindGroup(0, this.getBindGroupForTexture(rect.texture!));
                 passEncoder.setVertexBuffer(0, this.staticTexturedVertexBuffer, staticTexturedOffset);
                 staticTexturedOffset += texturedLayout.verts_per_quad * texturedLayout.bytes_per_vertex;
+                indexNum = texturedLayout.indices_per_quad;
             } else {
                 passEncoder.setPipeline(this.coloredPipeline);
                 passEncoder.setVertexBuffer(0, this.staticColoredVertexBuffer, staticColoredOffset);
                 staticColoredOffset += coloredLayout.verts_per_quad * coloredLayout.bytes_per_vertex;
+                indexNum = coloredLayout.indices_per_quad;
             }
-            passEncoder.drawIndexed(6);
+            passEncoder.drawIndexed(indexNum);
         }
 
         passEncoder.setPipeline(this.texturedPipeline);
@@ -365,7 +211,7 @@ export class Renderer {
             dynamicTexturedOffset += texturedLayout.verts_per_quad * texturedLayout.bytes_per_vertex;
 
             passEncoder.setIndexBuffer(this.indexBuffer, 'uint16');
-            passEncoder.drawIndexed(6);
+            passEncoder.drawIndexed(texturedLayout.indices_per_quad);
         }
 
         passEncoder.end();
@@ -373,19 +219,75 @@ export class Renderer {
         this.device.queue.submit([commandEncoder.finish()]);
     }
 
-    static async loadImageBitmap(url: string) {
+    private rebuildStaticBuffers(rects: VisualRect[]) {
+        this.calculateStaticData(rects);
+        this.staticColoredVertexBuffer = this.rebuildBuffer(this.staticColoredVertexData, "staticColoredVertexBuffer");
+        this.staticTexturedVertexBuffer = this.rebuildBuffer(this.staticTexturedVertexData, "staticTexturedVertexBuffer");
+    }
+
+    private rebuildDynamicTexturedBuffers(rects: VisualRect[]) {
+        this.calculateDynamicTexturedData(rects);
+        this.dynamicTexturedVertexBuffer = this.rebuildBuffer(this.dynamicTexturedVertexData, "dynamicTexturedVertexBuffer");
+    }
+
+    private rebuildBuffer(vertexData: Float32Array, label: string): GPUBuffer {
+        let vertexBuffer: GPUBuffer= this.device.createBuffer({
+            label: label,
+            size:  vertexData.byteLength,
+            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+        });
+        this.writeBuffer(vertexBuffer, vertexData);
+        return vertexBuffer;
+    }
+
+    private writeBuffer(buffer: GPUBuffer, data: Float32Array): void {
+        this.device.queue.writeBuffer(buffer, 0, data as Float32Array<ArrayBuffer>);
+    }
+
+    private calculateDynamicTexturedData(rects: VisualRect[]) {
+        const sw = this.canvas.width;
+        const sh = this.canvas.height;
+
+        this.dynamicTexturedVertexData = new Float32Array(rects.length * texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex);
+
+        let offset = 0;
+        for (let i = 0; i < rects.length; i++) {
+            const { x, y, w, h, facing, color = [1, 1, 1, 1], texture, variant } = rects[i];
+            this.dynamicTexturedVertexData.set(this.rectToVertexData(x, y, w, h, facing, sw, sh, variant, color, texture), offset);
+            offset += texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex;
+        }
+    }
+
+    private calculateStaticData(rects: VisualRect[]) {
+        const sw = this.canvas.width;
+        const sh = this.canvas.height;
+        const texturedRects: VisualRect[] = rects.filter(r => r.texture);
+        const coloredRects: VisualRect[] = rects.filter(r => !r.texture);
+
+        this.staticTexturedVertexData = new Float32Array(texturedRects.length * texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex);
+        this.staticColoredVertexData = new Float32Array(coloredRects.length * coloredLayout.verts_per_quad * coloredLayout.floats_per_vertex);
+
+        let texturedOffset = 0;
+        let coloredOffset = 0;
+        for (let i = 0; i < rects.length; i++) {
+            const { x, y, w, h, facing, color = [1, 1, 1, 1], texture, variant } = rects[i];
+            if (rects[i].texture){
+                this.staticTexturedVertexData.set(this.rectToVertexData(x, y, w, h, facing, sw, sh, variant, color, texture), texturedOffset);
+                texturedOffset += texturedLayout.verts_per_quad * texturedLayout.floats_per_vertex;
+            } else {
+                this.staticColoredVertexData.set(this.rectToVertexData(x, y, w, h, facing, sw, sh, variant, color, texture), coloredOffset);
+                coloredOffset += coloredLayout.verts_per_quad * coloredLayout.floats_per_vertex;
+            }
+        }
+    }
+
+    private static async loadImageBitmap(url: string) {
         const res = await fetch(url);
         const blob = await res.blob();
         return await createImageBitmap(blob, { colorSpaceConversion: 'none' });
     }
 
-    private getBindGroupForTexture(texture: string): GPUBindGroup {
-        const bg = this.bindGroupMap.get(texture);
-        if (!bg) console.warn(`No bind group found for texture: "${texture}"`);
-        return bg;
-    }
-
-    private static createPipelineFromLayout (device: GPUDevice, vertShader: string, fragmentShader: string, vertexBufferStride: number, attributes: Iterable<GPUVertexAttribute>, label: string)
+    private static createPipelineFromLayout (device: GPUDevice, vertShader: string, fragmentShader: string, vertexBufferStride: number, attributes: GPUVertexAttribute[], label: string)
     :GPURenderPipeline {
         const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
         return device.createRenderPipeline({
@@ -395,7 +297,7 @@ export class Renderer {
                 module: device.createShaderModule({ code: vertShader }),
                 buffers: [{
                     arrayStride: vertexBufferStride,
-                    attributes: [...attributes],
+                    attributes: attributes,
                 }],
             },
             fragment: {
@@ -418,5 +320,106 @@ export class Renderer {
             },
             primitive: { topology: 'triangle-list' },
         });
+    }
+
+    private rectToVertexData(
+        x: number, y: number, w: number, h: number, facing: "left" | "right",
+        sw: number, sh: number,
+        variant: number, color?: number[], texture?: string,
+    ): Float32Array {
+
+        const toNDC = (px: number, py: number): [number, number] => [
+            (px / sw) *  2 - 1,
+            (py / sh) * -2 + 1, //Y-axis in clip space is +1 at the top and -1 at bottom, while pixel position is 0 at top and grows downwards. Calculation needs to be inverted.
+        ];
+        const tl = toNDC(x,     y    );
+        const tr = toNDC(x + w, y    );
+        const br = toNDC(x + w, y + h);
+        const bl = toNDC(x,     y + h);
+
+        let vertexArray = new Float32Array([]);
+        let startU, startV, endU, endV, r, g, b, a;
+        if (texture) {
+            const textureProps = textureURLs.find(t => t.name === texture);
+            if (!textureProps.atlas){
+                startU = 0;
+                startV = 0;
+                endU = w / textureProps.tilingX;
+                endV = h / textureProps.tilingY;
+            } else [startU, startV, endU, endV] = this.getUVsFromVariant(variant);
+            if (facing === "right"){
+                vertexArray = new Float32Array([
+                    ...tl, startU,startV,
+                    ...tr, endU,startV,
+                    ...br, endU,endV,
+                    ...bl, startU,endV,
+                ]);
+            } else if (facing === "left"){
+                vertexArray = new Float32Array([
+                    ...tl, endU,startV,
+                    ...tr, startU,startV,
+                    ...br, startU,endV,
+                    ...bl, endU,endV,
+                ]);
+            }
+
+        } else if (color){
+            [r,g,b,a] = color;
+            vertexArray = new Float32Array([
+                ...tl, r,g,b,a,
+                ...tr, r,g,b,a,
+                ...br, r,g,b,a,
+                ...bl, r,g,b,a,
+            ])
+        }
+        return vertexArray;
+    }
+
+    private getUVsFromVariant(variant: number){
+        switch (variant) {
+            case 0:
+                return [0, 0, 1/4, 1/4];
+            case 1:
+                return [0, 3/4, 1/4, 4/4];
+            case 2:
+                return [3/4, 3/4, 4/4, 4/4];
+            case 3:
+                return [3/4, 2/4, 4/4, 3/4];
+            case 4:
+                return [1/4, 3/4, 2/4, 4/4];
+            case 5:
+                return [1/4, 2/4, 2/4, 3/4];
+            case 6:
+                return [2/4, 3/4, 3/4, 4/4];
+            case 7:
+                return [2/4, 2/4, 3/4, 3/4];
+            case 8:
+                return [0, 1/4, 1/4, 2/4];
+            case 9:
+                return [0, 2/4, 1/4, 3/4];
+            case 10:
+                return [3/4, 0, 4/4, 1/4];
+            case 11:
+                return [3/4, 1/4, 4/4, 2/4];
+            case 12:
+                return [1/4, 0, 2/4, 1/4];
+            case 13:
+                return [1/4, 1/4, 2/4, 2/4];
+            case 14:
+                return [2/4, 0, 3/4, 1/4];
+            case 15:
+                return [2/4, 1/4, 3/4, 2/4];
+        }
+    }
+
+    private resizeCanvas(canvas: HTMLCanvasElement): void {
+        canvas.width  = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+    }
+
+    private getBindGroupForTexture(texture: string): GPUBindGroup {
+        const bg = this.bindGroupMap.get(texture);
+        if (!bg) console.warn(`No bind group found for texture: "${texture}"`);
+        return bg;
     }
 }
